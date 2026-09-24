@@ -180,12 +180,6 @@ present.
 > this note once done) rather than treating this section as hardware-
 > proven on the strength of the dry-run flag checks alone.
 
-## Repository structure note
-
-This repo's history was extracted with `git filter-repo` from a larger
-development sandbox, preserving the real commit-by-commit history of each
-project's CMSIS-RTOS2 migration and hardware validation — not squashed
-into a single import commit.
 
 ## License
 
