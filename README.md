@@ -73,7 +73,30 @@ echo 'export CMSIS_PACK_ROOT="$HOME/.cache/arm/packs"' >> ~/.bashrc
 cpackget init https://www.keil.com/pack/index.pidx
 ```
 
-### 5. J-Link tools (for flashing)
+### 5. Register the CSP4CMSIS pack
+
+`OliverFaust::CSP4CMSIS` is **not** in Arm's public pack index — it's
+self-hosted via GitHub Releases (see
+[CSP4CMSIS's own README](https://github.com/OliverFaust/CSP4CMSIS#getting-started)
+for why). `cpackget init` above only knows about the public index, so this
+pack has to be added explicitly, once, before any of the examples in this
+repo can build:
+
+```bash
+cpackget add https://github.com/OliverFaust/CSP4CMSIS/releases/latest/download/OliverFaust.CSP4CMSIS.pdsc
+```
+
+Confirm it registered correctly:
+```bash
+cpackget list
+# should include: OliverFaust::CSP4CMSIS@<version>
+```
+
+If you ever update CSP4CMSIS to a newer release, re-run the `cpackget add`
+above (or `cpackget update OliverFaust::CSP4CMSIS`) to pick it up — it
+won't update automatically.
+
+### 6. J-Link tools (for flashing)
 
 Download the **J-Link Software and Documentation Pack** for Linux
 (x86_64, `.deb`) from
@@ -84,7 +107,7 @@ via a stable direct URL) and install:
 sudo dpkg -i JLink_Linux_*_x86_64.deb
 ```
 
-### 6. Alif SETOOLS
+### 7. Alif SETOOLS
 
 Alif's `app-release-exec-linux` packaging tool and Secure Enclave
 services are required to produce a flashable image from the build output.
@@ -107,9 +130,13 @@ directory:
 
 ```bash
 cd csp4cmsis_alt_test
-csolution list packs -s CSP4CMSIS_AltTest.csolution.yml -m   # fetches any missing packs, including OliverFaust::CSP4CMSIS
 cbuild CSP4CMSIS_AltTest.csolution.yml --packs
 ```
+(`--packs` fetches any *other* missing dependency packs referenced by the
+solution — CMSIS-CORE, the RTOS2 backend, the DK-E8 BSP, etc. It does
+**not** register `OliverFaust::CSP4CMSIS` itself if you skipped step 5
+above; that one has to be added explicitly first, once, since it isn't in
+the public index `--packs` searches.)
 
 Substitute `neuropathway/Neuropathway.csolution.yml` or
 `csp4cmsis_pack_test/`'s own `.csolution.yml` for the other examples. Add
