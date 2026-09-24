@@ -1,0 +1,72 @@
+# neuropathway -- the real Sensor -> Inference -> Console CSP process
+# network for DK-E8/RTSS-HP, not another isolated smoke test.
+#
+# Combines, for the first time in one continuous loop:
+#  - icm42670_windowing_test's proven decimation/unit-conversion/
+#    windowing pipeline (real, continuous IMU acquisition -- not
+#    stopped after one window)
+#  - executorch_batch_test's proven ExecuTorch/NPU inference chain
+#    (100/100 correct on embedded vectors)
+#  - csp4cmsis_neuropathway's Camera/Inference/Console process-network
+#    shape (unbuffered rendezvous channels, StaticNetwork execution
+#    mode, FreeRTOS via csp4cmsis_alt_test's proven integration),
+#    retargeted from Camera to Sensor (IMU, not camera)
+#
+# Critical, load-bearing choice carried over from single_shot_test_no_
+# ioflex (Variant A): ZERO SERVICES_set_run_cfg() calls anywhere.
+# Session-long investigation (icm42670_inference_test/_mpu_fix's
+# toTensor()/Tag::None crash, isolated across nine builds) found that
+# calling SERVICES_set_run_cfg() even ONCE, with any payload, at any
+# point, with any settling delay, corrupts state ExecuTorch's
+# Method::init() depends on for input EValue tagging -- while zero
+# calls is unconditionally safe. board_pins_config() (libs/board_config/
+# board_config.c) already sets 1.8V flex-IO itself via a direct
+# VBAT->GPIO_CTRL register write under #if(FLEX_IO_VOLTAGE_1V8==1) --
+# confirmed 1 in this board's board_defs.h -- making the SE IOFLEX call
+# redundant, not just skippable.
+solution:
+  created-for: CMSIS-Toolbox@2.14.1
+  cdefault: # use the cdefault.yml next to this file
+
+  compiler: GCC
+  select-compiler:
+    - compiler: GCC
+
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.2.0-0
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Compiler@^2.1.0
+    - pack: ARM::CMSIS-FreeRTOS@^11.3.0
+    # CSP4CMSIS as a packaged component (OliverFaust::CSP4CMSIS:Core in
+    # M55_HP.cproject.yml) instead of raw csp4cmsis/src/*.cpp compiled
+    # directly -- GitHub-hosted, resolved via cpackget from
+    # https://github.com/OliverFaust/CSP4CMSIS/releases.
+    - pack: OliverFaust::CSP4CMSIS@^1.0.0
+
+    - pack: PyTorch::ExecuTorch
+      path: ../tools/modelnova/packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12
+
+    - pack: ARM::ethos-u-core-driver@^1.26.2
+
+  target-types:
+    - type: DevKit-E8
+      board: DevKit-E8
+      device: AE822FA0E5597LS0
+      define:
+        - ETHOSU55
+
+  build-types:
+    - type: Debug
+      debug: on
+      # -O0 overflows ITCM once I3C+FreeRTOS+ExecuTorch+Ethos-U driver
+      # combine (same issue icm42670_inference_test_mpu_fix and
+      # icm42670_single_shot_test both hit) -- -Og fits while keeping
+      # full DWARF symbols.
+      optimize: debug
+
+    - type: Release
+      debug: off
+      optimize: balanced
+
+  projects:
+    - project: M55_HP/M55_HP.cproject.yml

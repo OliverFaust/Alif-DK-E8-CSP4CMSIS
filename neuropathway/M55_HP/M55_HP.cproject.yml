@@ -1,0 +1,169 @@
+project:
+  device: :M55_HP
+
+  define:
+    - ACTIVATION_BUF_SZ: 32768
+    # csp4cmsis.mk defines this for the library build (see
+    # csp4cmsis_alt_test's own cproject.yml comment for the same note --
+    # nothing in current sources actually guards on it, set for
+    # fidelity).
+    - LIB_CSP4CMSIS
+    # Must match this project's own configMAX_SYSCALL_INTERRUPT_PRIORITY
+    # (RTE/RTOS/FreeRTOSConfig.h) -- see csp/csp_critical.h. Re-derived
+    # empirically for this project's RTOS2-template FreeRTOSConfig.h
+    # rather than reused from csp4cmsis_alt_test's 128 or this project's
+    # own prior (native-template-era) 0x20 -- see the FreeRTOSConfig.h
+    # comment at this same setting for the derivation.
+    - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
+    # csp4cmsis's static (zero-heap) allocation for RTOS objects became an
+    # explicit per-backend opt-in (csp_rtos_static.h) during the RTX5-
+    # portability work -- this project never got these two defines added
+    # at that time (that pass was scoped to csp4cmsis_alt_test only), so
+    # its Sensor/Inference/Console CSProcess threads and AltScheduler
+    # event-flags objects had been silently falling back to dynamic/heap
+    # allocation since then, an unflagged regression from this project's
+    # original always-static behavior. These restore it, matching the
+    # same fix already applied to csp4cmsis_alt_test.
+    - CSP4CMSIS_STATIC_ALLOCATION
+    - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+
+  add-path:
+    - ./device
+    - ./model
+    - ./csp
+    # No ../../csp4cmsis/inc here -- CSP4CMSIS's headers now come
+    # entirely from the OliverFaust::CSP4CMSIS:Core component below,
+    # which declares its own include path (csp4cmsis_pack_test proved
+    # this works), not from this project's local relative paths anymore.
+
+  misc:
+    - for-compiler: GCC
+      CPP:
+        - -std=gnu++17
+        - -fno-exceptions
+        - -fno-rtti
+      # ARM::ethos-u-core-driver's ethosu_driver.c/ethosu_pmu.c use
+      # PRIx64/PRIu64 without including <inttypes.h> themselves, and this
+      # toolchain's <inttypes.h> doesn't define those macros for this
+      # target multilib regardless -- same fix as every prior ExecuTorch
+      # stage.
+      C:
+        - -include inttypes_workaround.h
+      Link:
+        - -u _printf_float
+
+  groups:
+    - group: Source Files
+      files:
+        - file: ./main.cpp
+        - file: ./app_utils.h
+
+    - group: Device
+      files:
+        - file: ./device/BoardInit.hpp
+        - file: ./device/BoardInit.cpp
+
+    - group: Model
+      files:
+        - file: ./model/BufAttributes.hpp
+        - file: ./model/ethosu_mem_config.h
+        - file: ./model/har_net_pte.h
+
+    # csp4cmsis library sources no longer compiled directly -- see the
+    # OliverFaust::CSP4CMSIS:Core component below. (kernel.cpp used to
+    # be compiled here too, but it's dead code -- its ThreadFuncWrapper
+    # is entirely commented out, the real one is csp_wrapper.cpp -- and
+    # the packaged component's own <files> list deliberately excludes
+    # it; dropping it here just stops building an inert class nothing
+    # ever referenced.)
+
+    # This project's own Sensor/Inference/Console network -- see each
+    # file's own header comment for how it's shaped after
+    # csp4cmsis_neuropathway's Camera/Inference/Console network.
+    - group: CSP Network
+      files:
+        - file: ./csp/common_types.h
+        - file: ./csp/sensor_process.h
+        - file: ./csp/sensor_process.cpp
+        - file: ./csp/inference_process.h
+        - file: ./csp/inference_process.cpp
+        - file: ./csp/console_process.h
+        - file: ./csp/console_process.cpp
+        - file: ./csp/csp4cmsis_spn.h
+        - file: ./csp/csp4cmsis_spn.cpp
+        # Local operator new/delete override (routed through FreeRTOS's
+        # pvPortMalloc/vPortFree) -- see heap_glue.cpp's own header
+        # comment for why this lives here and not in csp4cmsis's shared
+        # glue.cpp anymore.
+        - file: ./csp/heap_glue.cpp
+
+  components:
+    - component: CMSIS:CORE
+    - component: Device:Startup
+    - component: Device:SOC Peripherals:GPIO
+    - component: Device:SOC Peripherals:PINCONF
+    - component: Device:SOC Peripherals:MHU
+    - component: Device:SOC Peripherals:I3C
+
+    - component: BSP:DevKit Config&DevKit-e8
+    - component: BSP:Board Config
+    - component: BSP:External peripherals:ICM42670P Accelerometer
+
+    - component: Services:Retarget IO:STDOUT
+    - component: Services:Secure Enclave:Initialization Helper&Source
+    - component: Services:Secure Enclave:core&Source
+
+    - component: CMSIS Driver:USART
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDOUT:Custom
+
+    - component: Machine Learning:ExecuTorch:Runtime
+    - component: Machine Learning:ExecuTorch:Kernel Utils
+    - component: Machine Learning:ExecuTorch:Kernel Registration
+    - component: Machine Learning:ExecuTorch:Backend EthosU
+    - component: Machine Learning:ExecuTorch:Platform Bare-Metal
+    - component: Machine Learning:ExecuTorch:Stubs RandomOps
+    - component: Machine Learning:ExecuTorch:Operators Quantized quantize
+    - component: Machine Learning:ExecuTorch:Operators Quantized dequantize
+    - component: Machine Learning:NPU Support:Ethos-U Driver&Generic U55
+
+    # FreeRTOS is still the underlying scheduler, but csp4cmsis itself now
+    # calls only the CMSIS-RTOS2 API (cmsis_os2.h) -- Config&CMSIS RTOS2
+    # (rather than Config&FreeRTOS) plus the CMSIS:RTOS2:FreeRTOS adapter
+    # component below wire cmsis_os2.h through to this same native FreeRTOS
+    # kernel, matching csp4cmsis_alt_test's migration. Core/Heap_4/Timers/
+    # Event Groups stay required underneath: osEventFlags*/osTimer* in
+    # this pack are implemented on top of native FreeRTOS event groups/
+    # timers, just no longer called directly. Event Groups specifically
+    # for alternative.cpp's AltScheduler, linked in even though this
+    # network doesn't use Alternative/Alt -- csp4cmsis's channel
+    # implementation itself doesn't depend on it, but keeping the exact
+    # proven component set avoids re-discovering that dependency's edges
+    # here.
+    - component: RTOS&FreeRTOS:Core&Cortex-M
+    - component: RTOS&FreeRTOS:Config&CMSIS RTOS2
+    - component: RTOS&FreeRTOS:Heap&Heap_4
+    - component: RTOS&FreeRTOS:Timers
+    - component: RTOS&FreeRTOS:Event Groups
+    - component: CMSIS:RTOS2:FreeRTOS&Cortex-M
+
+    # CSP4CMSIS itself, as a packaged component (the GitHub-hosted pack
+    # referenced in this solution's own csolution.yml packs: list --
+    # rather than raw csp4cmsis/src/*.cpp compiled directly). Its
+    # condition "CSP4CMSIS Core" requires CMSIS:RTOS2 and CMSIS:CORE,
+    # satisfied by the components above/below.
+    - component: OliverFaust::CSP4CMSIS:Core
+    # cmsis_os2.c (the RTOS2-over-FreeRTOS adapter) calls OS_Tick_GetCount()/
+    # OS_Tick_GetOverflow()/OS_Tick_GetInterval() for osKernelGetSysTimerCount()
+    # -- these come from CMSIS's OS Tick abstraction, not FreeRTOS itself.
+    # M55_HP has no other SysTick consumer, so this is the correct provider
+    # (matches csp4cmsis_alt_test's own build-config fix, needed there for
+    # the identical link error).
+    - component: CMSIS:OS Tick:SysTick
+
+  output:
+    type:
+      - elf
+      - bin
+      - hex
+      - map

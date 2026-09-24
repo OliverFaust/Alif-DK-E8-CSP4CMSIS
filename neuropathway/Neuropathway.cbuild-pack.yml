@@ -1,0 +1,20 @@
+cbuild-pack:
+  resolved-packs:
+    - resolved-pack: ARM::CMSIS@6.3.0
+      selected-by-pack:
+        - ARM::CMSIS@^6.2.0
+    - resolved-pack: ARM::CMSIS-Compiler@2.3.0
+      selected-by-pack:
+        - ARM::CMSIS-Compiler@^2.1.0
+    - resolved-pack: ARM::CMSIS-FreeRTOS@11.3.0
+      selected-by-pack:
+        - ARM::CMSIS-FreeRTOS@^11.3.0
+    - resolved-pack: ARM::ethos-u-core-driver@1.26.5
+      selected-by-pack:
+        - ARM::ethos-u-core-driver@^1.26.2
+    - resolved-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by-pack:
+        - AlifSemiconductor::Ensemble@^2.2.0-0
+    - resolved-pack: OliverFaust::CSP4CMSIS@1.0.0
+      selected-by-pack:
+        - OliverFaust::CSP4CMSIS@^1.0.0

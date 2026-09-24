@@ -1,0 +1,133 @@
+# A project translates into one executable or library.
+project:
+  device: :M55_HP
+
+  # csp4cmsis's headers cross-include each other by bare name from within
+  # inc/csp/ (e.g. process.h does `#include "time.h"`, not "csp/time.h"),
+  # so both inc/ (for application.cpp's `#include "csp/csp4cmsis.h"`) and
+  # inc/csp/ itself need to be on the include path -- matches csp4cmsis.mk's
+  # CSP4CMSIS_INCDIR.
+  add-path:
+    - ../../csp4cmsis/inc
+    - ../../csp4cmsis/inc/csp
+
+  # csp4cmsis.mk defines this for the library build; nothing in the current
+  # sources is actually guarded on it, but set it for fidelity with the
+  # library's own build description.
+  define:
+    - LIB_CSP4CMSIS
+    # RTX5 validation pass: kept at 128 (the FreeRTOS-adapter value),
+    # empirically re-verified on RTX5 hardware rather than assumed safe.
+    # RTX5 itself has no direct configMAX_SYSCALL_INTERRUPT_PRIORITY
+    # equivalent to match -- confirmed by reading rtx_core_cm.h: on this
+    # ARMv8-M target RTX5's own internal critical sections use LDREX/STREX
+    # exclusive-access atomics (EXCLUSIVE_ACCESS==1), not BASEPRI priority
+    # masking, so there's no RTX5-owned threshold value this needs to
+    # agree with. What this define actually needs to satisfy is
+    # independent of which RTOS backend is running: csp4cmsis's own
+    # critical section (csp_critical.h) protects csp4cmsis's own data
+    # (e.g. buffered_channel.h's alt_reader/read_bit), and the peripheral
+    # IRQ priorities it needs to keep unmasked (console UART etc., sitting
+    # at priority 0 per RTE_Device.h) are backend-independent RTE
+    # settings, unaffected by the RTOS2 backend choice.
+    - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
+    # csp4cmsis's static (zero-heap) allocation for RTOS objects became an
+    # explicit per-backend opt-in (csp_rtos_static.h) during the RTX5-
+    # portability work -- without these two defines, csp4cmsis silently
+    # falls back to dynamic/heap allocation, which would be a real,
+    # unintended behavior change for this project (it was always static
+    # before that refactor). These preserve the original behavior exactly.
+    - CSP4CMSIS_STATIC_ALLOCATION
+    # RTX5 validation pass: swapped from CSP4CMSIS_RTOS2_BACKEND_FREERTOS.
+    # This project still uses static (zero-heap) allocation -- unchanged,
+    # only which backend's control-block types back it changed.
+    - CSP4CMSIS_RTOS2_BACKEND_RTX5
+
+  # C++ standard for csp4cmsis + application.cpp. -fno-exceptions/-fno-rtti:
+  # nothing in csp4cmsis or application.cpp throws/catches or uses RTTI
+  # (exceptions.h's PoisonException is dead code -- defined but never
+  # included by csp4cmsis.h, never thrown anywhere) or needs it, and
+  # dropping both keeps unwind-table/typeinfo bloat out of a build that
+  # already routes operator new/delete through the FreeRTOS heap.
+  misc:
+    - for-compiler: GCC
+      CPP:
+        - -std=gnu++17
+        - -fno-exceptions
+        - -fno-rtti
+
+  groups:
+    - group: Source Files
+      files:
+        - file: ./main.cpp
+        - file: ./app_utils.h
+
+    # csp4cmsis library sources (see csp4cmsis/csp4cmsis.mk for the
+    # upstream Himax-GCC-SDK build this mirrors). kernel.cpp's active code
+    # is just an inert, unused `csp::internal::Process` class declaration
+    # left over from an earlier design (its ThreadFuncWrapper is entirely
+    # commented out) -- the real ThreadFuncWrapper is in csp_wrapper.cpp.
+    # Flagged in the session summary; not modified here since it compiles
+    # and links cleanly as-is.
+    - group: csp4cmsis
+      files:
+        - file: ../../csp4cmsis/src/sync_channel.cpp
+        - file: ../../csp4cmsis/src/kernel.cpp
+        - file: ../../csp4cmsis/src/alternative.cpp
+        - file: ../../csp4cmsis/src/csp_wrapper.cpp
+        - file: ../../csp4cmsis/src/glue.cpp
+        - file: ../../csp4cmsis/src/channel_sync.cpp
+        - file: ../../csp4cmsis/src/barrier.cpp
+        - file: ../../csp4cmsis/src/alt_channel_sync.cpp
+        - file: ../../csp4cmsis/src/buffered_channel.cpp
+
+    # Library smoke-test app (Alternation example) -- distinct from the
+    # eventual Camera/Inference/Console pipeline (stage 3).
+    #
+    # critsec_isr_test.cpp (repo root, alongside application.cpp) is a
+    # second, ISR-exercising test app used to validate the BASEPRI
+    # critical-section fix -- see docs/debugging-case-studies.md or the
+    # session report. Swap the file: line below to point at it (and
+    # uncomment the LPTIMER component above) to re-run that validation;
+    # application.cpp is the project's normal, permanent smoke test.
+    - group: Application
+      files:
+        - file: ../../application.cpp
+
+  # List components to use for your application.
+  # A software component is a re-usable unit that may be configurable.
+  components:
+    - component: Device:SOC Peripherals:GPIO
+    - component: CMSIS:CORE
+    - component: Device:SOC Peripherals:PINCONF
+    - component: Device:Startup
+    - component: BSP:DevKit Config&DevKit-e8
+    - component: BSP:Board Config
+    - component: Services:Retarget IO:STDOUT
+    - component: Services:Secure Enclave:Initialization Helper&Source
+    - component: Services:Secure Enclave:core&Source
+    - component: Device:SOC Peripherals:MHU
+    # LPTIMER0 (channel 0) is only needed when critsec_isr_test.cpp is
+    # swapped in above -- not used by application.cpp. Commented out
+    # rather than removed so re-enabling the ISR test is a two-line change;
+    # uncomment alongside the Application group swap.
+    # - component: Device:SOC Peripherals:LPTIMER
+    - component: CMSIS Driver:USART
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDOUT:Custom
+
+    # RTX5 validation pass: native CMSIS-RTOS2 backend, no FreeRTOS
+    # involved at all (swapped from RTOS&FreeRTOS:Core/Config/Heap_4/
+    # Timers/Event Groups + CMSIS:RTOS2:FreeRTOS&Cortex-M).
+    - component: CMSIS:RTOS2:Keil RTX5&Source
+    # RTX5 also declares a SELECTABLE dependency on CMSIS:OS Tick (build
+    # warned about this) -- same provider the FreeRTOS adapter needed.
+    - component: CMSIS:OS Tick:SysTick
+
+  # List executable file formats to be generated.
+  output:
+    type:
+      - elf
+      - bin
+      - hex
+      - map

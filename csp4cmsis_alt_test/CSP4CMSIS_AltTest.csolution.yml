@@ -1,0 +1,44 @@
+# CSP4CMSIS Alternation smoke-test solution -- stage 2 of the DK-E8
+# neuropathway port. Copied from freertos_blinky/ (stage 1) as a starting
+# point; diverges independently from here on (see M55_HP.cproject.yml for
+# what was added: csp4cmsis sources + C++ toolchain config).
+solution:
+  created-for: CMSIS-Toolbox@2.14.1
+  cdefault: # use the cdefault.yml next to this file
+
+  # Compiler fixed to GCC for this stage (see session decision).
+  compiler: GCC
+  select-compiler:
+    - compiler: GCC
+
+  # List the packs that define the device and/or board.
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.2.0-0
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Compiler@^2.1.0
+    - pack: ARM::CMSIS-FreeRTOS@^11.3.0
+    # RTX5 validation pass: native CMSIS-RTOS2 backend, no FreeRTOS
+    # involved. ARM::CMSIS-FreeRTOS stays listed above even though no
+    # component from it is selected below -- an unused pack reference is
+    # harmless, and removing it wasn't part of this pass's scope.
+    - pack: ARM::CMSIS-RTX@^5.9.1
+
+  # List different hardware targets that are used to deploy the solution.
+  target-types:
+    - type: DevKit-E8
+      board: DevKit-E8
+      device: AE822FA0E5597LS0
+
+  # List of different build configurations.
+  build-types:
+    - type: Debug
+      debug: on
+      optimize: none
+
+    - type: Release
+      debug: off
+      optimize: balanced
+
+  # List related projects.
+  projects:
+    - project: M55_HP/M55_HP.cproject.yml

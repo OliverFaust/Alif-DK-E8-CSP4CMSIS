@@ -1,0 +1,97 @@
+# A project translates into one executable or library.
+project:
+  device: :M55_HP
+
+  # No add-path to ../../csp4cmsis/inc here -- unlike csp4cmsis_alt_test,
+  # this project never touches the raw csp4cmsis/ directory at all.
+  # CSP4CMSIS's headers come entirely from the OliverFaust::CSP4CMSIS:Core
+  # component below; its own include path is resolved by csolution/cbuild
+  # from the pack's file list, not hand-added here. This is itself part
+  # of what this project is testing.
+
+  # Configuration exactly as documented in
+  # Documentation/CSP4CMSIS_Configuration.md (the packaged copy, same
+  # content, at Documentation/CSP4CMSIS_Configuration.md via the
+  # component's own doc file) -- set by following that document alone,
+  # not from any other knowledge of this repo's other projects.
+  define:
+    # Required (1): select the CMSIS-RTOS2 backend. FreeRTOS adapter --
+    # the simpler baseline; RTX5 is a follow-up.
+    - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+    # Optional (2): static (zero-heap) allocation for CSP4CMSIS's own
+    # RTOS2 objects.
+    - CSP4CMSIS_STATIC_ALLOCATION
+    # Required if using BufferedChannel/putFromISR() (3): this project's
+    # application.cpp doesn't use either (RendezvousChannel/ALT only,
+    # copied from csp4cmsis_alt_test's application.cpp), so per the doc's
+    # own final paragraph in section 3, this define isn't required at
+    # all. Set anyway, at the same value already derived and hardware-
+    # confirmed for this exact board (DK-E8 M55_HP) in csp4cmsis_alt_test
+    # -- the doc is explicit this value depends on board peripheral IRQ
+    # priorities, not on which project/backend is asking, so reusing it
+    # for the same board is correct, not tribal knowledge.
+    - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
+
+  # C++ standard for application.cpp. -fno-exceptions/-fno-rtti: matches
+  # csp4cmsis_alt_test -- CSP4CMSIS itself is built with the same flags
+  # inside its own pack component definition.
+  misc:
+    - for-compiler: GCC
+      CPP:
+        - -std=gnu++17
+        - -fno-exceptions
+        - -fno-rtti
+
+  groups:
+    - group: Source Files
+      files:
+        - file: ./main.cpp
+        - file: ./app_utils.h
+
+    # Application logic reused verbatim from csp4cmsis_alt_test/
+    # application.cpp (two Senders racing into a Receiver via
+    # Alternative) -- the point of this project is testing whether the
+    # packaged component resolves/links/runs correctly, not new test
+    # logic.
+    - group: Application
+      files:
+        - file: ./application.cpp
+
+  # List components to use for your application.
+  components:
+    - component: Device:SOC Peripherals:GPIO
+    - component: CMSIS:CORE
+    - component: Device:SOC Peripherals:PINCONF
+    - component: Device:Startup
+    - component: BSP:DevKit Config&DevKit-e8
+    - component: BSP:Board Config
+    - component: Services:Retarget IO:STDOUT
+    - component: Services:Secure Enclave:Initialization Helper&Source
+    - component: Services:Secure Enclave:core&Source
+    - component: Device:SOC Peripherals:MHU
+    - component: CMSIS Driver:USART
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDOUT:Custom
+
+    # CSP4CMSIS itself, as a packaged component -- the actual subject of
+    # this test. Its condition="CSP4CMSIS Core" requires CMSIS:RTOS2 and
+    # CMSIS:CORE, satisfied by the components below/above.
+    - component: OliverFaust::CSP4CMSIS:Core
+
+    # Same FreeRTOS-adapter component set as csp4cmsis_alt_test used
+    # before its RTX5 swap.
+    - component: RTOS&FreeRTOS:Core&Cortex-M
+    - component: RTOS&FreeRTOS:Config&CMSIS RTOS2
+    - component: RTOS&FreeRTOS:Heap&Heap_4
+    - component: RTOS&FreeRTOS:Timers
+    - component: RTOS&FreeRTOS:Event Groups
+    - component: CMSIS:RTOS2:FreeRTOS&Cortex-M
+    - component: CMSIS:OS Tick:SysTick
+
+  # List executable file formats to be generated.
+  output:
+    type:
+      - elf
+      - bin
+      - hex
+      - map

@@ -1,0 +1,41 @@
+# CSP4CMSIS pack-consumption test -- verifies OliverFaust::CSP4CMSIS:Core
+# resolves and builds as a real CMSIS-Pack component (installed via
+# cpackget from the local OliverFaust.CSP4CMSIS.1.0.0.pack archive), not
+# as raw source compiled directly out of csp4cmsis/. Structured the same
+# way as csp4cmsis_alt_test (its raw-source counterpart, kept unmodified
+# for comparison) -- FreeRTOS-adapter backend, same target/board.
+solution:
+  created-for: CMSIS-Toolbox@2.14.1
+  cdefault: # use the cdefault.yml next to this file
+
+  compiler: GCC
+  select-compiler:
+    - compiler: GCC
+
+  # List the packs that define the device, board, and CSP4CMSIS itself.
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.2.0-0
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Compiler@^2.1.0
+    - pack: ARM::CMSIS-FreeRTOS@^11.3.0
+    - pack: OliverFaust::CSP4CMSIS@^1.0.0
+
+  # List different hardware targets that are used to deploy the solution.
+  target-types:
+    - type: DevKit-E8
+      board: DevKit-E8
+      device: AE822FA0E5597LS0
+
+  # List of different build configurations.
+  build-types:
+    - type: Debug
+      debug: on
+      optimize: none
+
+    - type: Release
+      debug: off
+      optimize: balanced
+
+  # List related projects.
+  projects:
+    - project: M55_HP/M55_HP.cproject.yml
