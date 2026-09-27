@@ -164,29 +164,32 @@ binaries resolve `utils/`/`build/` relative to the current working
 directory, not relative to the executable, so running them from elsewhere
 fails immediately with a `FileNotFoundError`.
 
+Worked example below is for `csp4cmsis_alt_test` specifically — substitute
+the project name, config JSON, and staged binary name for the other
+examples (each has its own `app-cfg-<project>.json` under
+`tools/setools/app-release-exec-linux/build/config/`).
+
 ### 1. Build
 
 ```bash
-cd <project_dir>
-cbuild <Name>.csolution.yml -c M55_HP.<Debug|Release>+DevKit-E8
+cd csp4cmsis_alt_test
+cbuild CSP4CMSIS_AltTest.csolution.yml -c M55_HP.Debug+DevKit-E8
 ```
-Output lands at `out/M55_HP/DevKit-E8/<Debug|Release>/M55_HP.bin`.
+Output lands at
+`csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin`.
 
 ### 2. Stage the binary and generate the APP TOC package
 
-Copy the freshly built `.bin` into
-`tools/setools/app-release-exec-linux/build/images/`, under the name your
-project's config JSON expects (see
-`build/config/app-cfg-<project>.json` — one already exists per project,
-e.g. `app-cfg-pack-test.json`, referencing `csp4cmsis_pack_test_hp.bin`).
-Each config JSON also carries the target MRAM address (`mramAddress`) and
-CPU id (`cpu_id`) for that project — don't reuse one project's config for
-another's binary.
-
 ```bash
+cp csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin \
+   tools/setools/app-release-exec-linux/build/images/csp4cmsis_alt_test_hp.bin
+
 cd tools/setools/app-release-exec-linux
-./app-gen-toc -f build/config/app-cfg-<project>.json -o build/AppTocPackage.bin
+./app-gen-toc -f build/config/app-cfg-alt-test.json -o build/AppTocPackage.bin
 ```
+`app-cfg-alt-test.json` already carries `csp4cmsis_alt_test`'s target
+MRAM address and CPU id — don't reuse another project's config against
+this binary, or vice versa.
 
 ### 3. Burn it to the board over serial
 
@@ -209,6 +212,17 @@ present.
 ```bash
 ./maintenance -opt getcpustatus
 ```
+
+### 5. Watch the serial console
+
+```bash
+minicom -D /dev/ttyACM0 -b 115200
+```
+Adjust the device path to match whatever `./app-write-mram -d` reported.
+`115200` is this board/toolchain combination's standard console baud rate
+— if output looks garbled, check the actual `Retarget-IO`/USART
+configuration in the project's `RTE_Device.h` rather than assuming this
+value is universally correct. Exit minicom with `Ctrl-A`, `X`.
 
 > **Note on verification status:** the flag/invocation shape above is
 > confirmed against the real SETOOLS binaries and config files. The full
