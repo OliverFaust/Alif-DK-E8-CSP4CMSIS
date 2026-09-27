@@ -1,4 +1,0 @@
-set semihosting args ../build/images/csp4cmsis_alt_test_hp.bin 0x80200000 ../build/AppTocPackage.bin 0x8057c890
-continue
-wait
-reset reset.hardware
