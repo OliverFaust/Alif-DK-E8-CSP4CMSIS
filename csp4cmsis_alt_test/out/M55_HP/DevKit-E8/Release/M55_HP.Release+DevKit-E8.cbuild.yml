@@ -1,0 +1,1209 @@
+build:
+  generated-by: csolution version 2.15.0
+  solution: ../../../../CSP4CMSIS_AltTest.csolution.yml
+  project: ../../../../M55_HP/M55_HP.cproject.yml
+  context: M55_HP.Release+DevKit-E8
+  compiler: GCC
+  board: Alif Semiconductor::DevKit-E8:A1
+  board-pack: AlifSemiconductor::Ensemble@2.2.0
+  board-books:
+    - name: https://alifsemi.com/support/kits/ensemble-e8devkit/
+      title: Ensemble E8 DevKit Web Page
+      category: overview
+  device: Alif Semiconductor::AE822FA0E5597LS0:M55_HP
+  device-pack: AlifSemiconductor::Ensemble@2.2.0
+  processor:
+    dsp: on
+    endian: little
+    fpu: dp
+    mve: fp
+    core: Cortex-M55
+  npu-info:
+    - type: Ethos-U55
+      macs: 256
+      vela-ini: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/scripts/vela/ensemble_vela.ini
+    - type: Ethos-U85
+      macs: 256
+      vela-ini: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/scripts/vela/ensemble_vela.ini
+  packs:
+    - pack: ARM::CMSIS-Compiler@2.3.0
+      path: ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0
+    - pack: ARM::CMSIS-RTX@5.9.1
+      path: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1
+    - pack: ARM::CMSIS@6.3.0
+      path: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0
+    - pack: AlifSemiconductor::Ensemble@2.2.0
+      path: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0
+  optimize: balanced
+  debug: off
+  misc:
+    C:
+      - -std=gnu11
+      - -masm-syntax-unified
+      - -fomit-frame-pointer
+      - -fdata-sections
+    CPP:
+      - -std=gnu++17
+      - -fno-exceptions
+      - -fno-rtti
+      - -masm-syntax-unified
+      - -fomit-frame-pointer
+      - -fdata-sections
+    Link:
+      - --specs=nano.specs
+      - --specs=nosys.specs
+      - -Wl,-print-memory-usage
+      - -Wl,--gc-sections
+      - -Wl,--no-warn-rwx-segments
+  define:
+    - LIB_CSP4CMSIS
+    - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
+    - CSP4CMSIS_STATIC_ALLOCATION
+    - CSP4CMSIS_RTOS2_BACKEND_RTX5
+    - RTSS_HP
+    - _RTE_
+  define-asm:
+    - RTSS_HP
+    - _RTE_
+  add-path:
+    - ../../../../../csp4cmsis/inc
+    - ../../../../../csp4cmsis/inc/csp
+    - ../../../../M55_HP/RTE/BSP/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/CMSIS
+    - ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/Services/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/_Release_DevKit-E8
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0/include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Driver/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include/rtss_hp
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/system/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/board_config
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/retarget_io/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/port/include
+  add-path-asm:
+    - ../../../../M55_HP/RTE/BSP/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/CMSIS
+    - ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/Services/AE822FA0E5597LS0_M55_HP
+    - ../../../../M55_HP/RTE/_Release_DevKit-E8
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0/include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Driver/Include
+    - ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include/rtss_hp
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/system/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/board_config
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/retarget_io/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/include
+    - ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/port/include
+  output-dirs:
+    intdir: ../../../../tmp
+    outdir: .
+    rtedir: ../../../../M55_HP/RTE
+  output:
+    - type: bin
+      file: M55_HP.bin
+    - type: elf
+      file: M55_HP.elf
+    - type: hex
+      file: M55_HP.hex
+    - type: map
+      file: M55_HP.elf.map
+    - type: comp-db
+      file: compile_commands.json
+    - type: comp-db
+      file: compile_macros_c.h
+    - type: comp-db
+      file: compile_macros_cxx.h
+  components:
+    - component: ARM::CMSIS-Compiler:CORE@1.2.1
+      condition: GCC CortexDevice
+      from-pack: ARM::CMSIS-Compiler@2.3.0
+      selected-by: CMSIS-Compiler:CORE
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0/source/core/gcc/retarget_syscalls.c
+          category: sourceC
+          version: 1.2.1
+    - component: ARM::CMSIS-Compiler:STDOUT:Custom@1.1.0
+      condition: CORE
+      from-pack: ARM::CMSIS-Compiler@2.3.0
+      selected-by: CMSIS-Compiler:STDOUT:Custom
+      implements: CMSIS-Compiler:STDOUT@1.1.0
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0/template/stdio/stdout_user.c
+          category: sourceC
+          attr: template
+          version: 1.1.0
+          select: STDOUT User Template
+    - component: ARM::CMSIS:CORE@6.2.0
+      condition: ARMv6_7_8-M Device
+      from-pack: ARM::CMSIS@6.3.0
+      selected-by: CMSIS:CORE
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Include
+          category: include
+          version: 6.2.0
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Include/tz_context.h
+          category: header
+          version: 6.2.0
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Template/ARMv8-M/main_s.c
+          category: sourceC
+          attr: template
+          version: 1.1.1
+          select: Secure mode 'main' module for ARMv8-M
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Core/Template/ARMv8-M/tz_context.c
+          category: sourceC
+          attr: template
+          version: 1.1.1
+          select: RTOS Context Management (TrustZone for ARMv8-M)
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Documentation/html/Core/index.html
+          category: doc
+          version: 6.2.0
+    - component: ARM::CMSIS:OS Tick:SysTick@1.0.5
+      condition: OS Tick SysTick
+      from-pack: ARM::CMSIS@6.3.0
+      selected-by: CMSIS:OS Tick:SysTick
+      implements: CMSIS:OS Tick@1.0.1
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Source/os_systick.c
+          category: sourceC
+          version: 1.0.5
+    - component: ARM::CMSIS:RTOS2:Keil RTX5&Source@5.9.1
+      condition: RTX5
+      from-pack: ARM::CMSIS-RTX@5.9.1
+      selected-by: CMSIS:RTOS2:Keil RTX5&Source
+      implements: CMSIS:RTOS2@2.3.0
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Documentation/index.html
+          category: doc
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Include/rtx_os.h
+          category: header
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/RTX5.scvd
+          category: other
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/GCC/irq_armv8mml.S
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_delay.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_evflags.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_evr.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_kernel.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_lib.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_memory.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_mempool.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_msgqueue.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_mutex.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_semaphore.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_system.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_thread.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Source/rtx_timer.c
+          category: source
+          version: 5.9.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/Events.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Events
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/MemPool.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Memory Pool
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/MsgQueue.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Message Queue
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/Mutex.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Mutex
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/Semaphore.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Semaphore
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/Thread.c
+          category: source
+          attr: template
+          version: 2.0.0
+          select: RTX Thread
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/Timer.c
+          category: source
+          attr: template
+          version: 2.0.1
+          select: RTX Timer
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/main.c
+          category: source
+          attr: template
+          version: 2.1.0
+          select: RTX 'main' function
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-RTX/5.9.1/Template/svc_user.c
+          category: source
+          attr: template
+          version: 1.0.0
+          select: RTX SVC User Table
+        - file: ../../../../M55_HP/RTE/CMSIS/RTX_Config.c
+          category: source
+          attr: config
+          version: 5.2.0
+        - file: ../../../../M55_HP/RTE/CMSIS/RTX_Config.h
+          category: header
+          attr: config
+          version: 5.6.1
+    - component: AlifSemiconductor::BSP:Board Config@2.2.0
+      condition: BSP Board Config
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: BSP:Board Config
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/board_config/board_config.c
+          category: source
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/board_config/board_config.h
+          category: header
+          version: 2.2.0
+    - component: AlifSemiconductor::BSP:DevKit Config&DevKit-e8@2.2.0
+      condition: Board Config E8
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: BSP:DevKit Config&DevKit-e8
+      files:
+        - file: ../../../../M55_HP/RTE/BSP/AE822FA0E5597LS0_M55_HP/board_defs.h
+          category: header
+          attr: config
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/BSP/AE822FA0E5597LS0_M55_HP/gpios.h
+          category: header
+          attr: config
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/BSP/AE822FA0E5597LS0_M55_HP/pins.h
+          category: header
+          attr: config
+          version: 2.2.0
+    - component: AlifSemiconductor::CMSIS Driver:USART@2.2.0
+      condition: Ensemble CMSIS_Driver
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: CMSIS Driver:USART
+      implements: CMSIS Driver:USART@2.4.0
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Include/Driver_USART_EX.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source/Driver_USART.c
+          category: source
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source/Driver_USART_Private.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/sys_ctrl_uart.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/uart.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/source/uart.c
+          category: source
+          version: 2.2.0
+    - component: AlifSemiconductor::Device:SOC Peripherals:GPIO@2.2.0
+      condition: Ensemble CMSIS_Driver
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Device:SOC Peripherals:GPIO
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Include/Driver_IO.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source/Driver_IO.c
+          category: source
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Alif_CMSIS/Source/Driver_IO_Private.h
+          category: source
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/sys_ctrl_gpio.h
+          category: header
+          version: 2.2.0
+    - component: AlifSemiconductor::Device:SOC Peripherals:MHU@1.110.0
+      condition: SE SERVICES MHU
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Device:SOC Peripherals:MHU
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/drivers_common.h
+          category: header
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/mhu.h
+          category: header
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/mhu_driver.h
+          category: header
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/source/mhu_driver.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/source/mhu_receiver.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/source/mhu_sender.c
+          category: source
+          version: 1.110.0
+    - component: AlifSemiconductor::Device:SOC Peripherals:PINCONF@2.2.0
+      condition: PINCONF Driver
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Device:SOC Peripherals:PINCONF
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/include/pinconf.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/drivers/source/pinconf.c
+          category: source
+          version: 2.2.0
+    - component: AlifSemiconductor::Device:Startup@2.2.0
+      condition: Ensemble CMSIS-Core
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Device:Startup
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/diskio.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/diskio.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/ff.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/ff.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/ffconf.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/ffsystem.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/FatFS/ffunicode.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_adc.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_adc_clickboard.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC Click Board Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_adc_exttrigger.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC External Trigger Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_adc_potentiometer.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Potentiometer Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_bmi323.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: BMI323 Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_canfd_blockingmode.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Polling Mode Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_canfd_busmonitor.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Bus Monitor Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_canfd_extloopback.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD External Loopback Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_canfd_intloopback.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Internal Loopback Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_canfd_normalmode.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Data Transfer Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_cdc200.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CDC200 Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_ch201_tof.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CH201 TOF Sensor Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_cmp.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CMP Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_crc.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CRC Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_dac.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DAC Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_dma_memcpy.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DMA Mem-Mem Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_dphy_loopback.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DPHY Loopback Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_flash.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: OSPI FLASH Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_gt911.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: GT911 Touch Screen Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_hwsem.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: HWSEM Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i2c.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i2s.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2S Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i3c_i2cbusproxy.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C using I3C Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i3c_i2cmixbus.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C I3C Mix Bus Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i3c_master.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I3C Master Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_i3c_slave.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I3C Slave Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_icm42670p.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ICM42670P 3-axis accelerometer Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_led_blinky.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LED Blinky Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_led_breathe.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LED PWM Baremtal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_lptimer.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LPTIMER Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_lvgl.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LVGL Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_mram.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: MRAM Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_parallel_display.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Parallel Display Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_pdm.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: PDM Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_pm.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Power Management Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_psram_e8.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: OSPI PSRAM XIP Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_rtc.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: RTC Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_sd.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_sd_fatfs.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDMMC FATFS Baremetal demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_sdio.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SDIO Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_spi_loopback.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SPI Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_spi_microwire.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Microwire Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_tsens.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: TSENS Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_uart2.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UART2 Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_uart4.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UART4 Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_utimer.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UTIMER Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/demo_wdt.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: WDT Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Baremetal/dphy_loopback.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DPHY Loopback Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Common/Include/i2s_samples.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: I2S Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/Common/Include/temperature.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: TSENS Baremetal Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_adc_clickboard_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC Click Board FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_adc_exttrigger_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC External Trigger FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_adc_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_adc_potentiometer_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ADC Potentiometer FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_camera_arx3a0_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ARX3A0 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_camera_mt9m114_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: MT9M114 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_camera_ov5640_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: OV5640 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_canfd_busmonitor_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Bus Monitor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_canfd_extloopback_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD External Loopback FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_canfd_intloopback_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Internal Loopback FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_canfd_normalmode_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CANFD Data transfer FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_cdc200_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CDC200 FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_cmp_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CMP FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_crc_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: CRC FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_dac_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DAC FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_dma_memcpy_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: DMA MEM-MEM FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_flash_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: OSPI Flash FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_gt911_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: GT911 Touch Screen FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_hwsem_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: HWSEM FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i2c_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i2s_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2S FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i3c_i2cbusproxy_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C using I3C FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i3c_i2cmixbus_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I2C I3C Mix Bus FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i3c_master_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I3C Master FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_i3c_slave_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: I3C Slave FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_led_blinky_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LED Blinky FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_led_breathe_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LED PWM FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_lptimer_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LPTIMER FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_mram_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: MRAM FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_parallel_display_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Parallel Display FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_pdm_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: PDM FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_rtc_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: RTC FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_spi_loopback_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: SPI FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_spi_microwire_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: Microwire FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_tsens_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: TSENS FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_uart2_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UART2 FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_uart4_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UART4 FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_utimer_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: UTIMER FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/FreeRTOS/demo_wdt_freertos.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: WDT FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/bayer2rgb/bayer.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ARX3A0 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/bayer2rgb/bayer.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: ARX3A0 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/bayer2rgb/bayer2rgb.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: ARX3A0 Camera Sensor FreeRTOS Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/cmsis_rtos2/USBD_User_CDC_ACM.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: USBD CMSIS RTOS2 Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/cmsis_rtos2/demo_mci_mdk_cmsisrtos2.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: MCI-MDK CMSIS RTOS2 Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/cmsis_rtos2/demo_usb_device_app.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: USBD CMSIS RTOS2 Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/lwip/httpd/fs.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LWIP httpd Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/lwip/httpd/httpd.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LWIP httpd Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/lwip/httpd/httpd_structs.h
+          category: header
+          attr: template
+          version: 2.2.0
+          select: LWIP httpd Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Boards/Templates/lwip/httpd/main.c
+          category: source
+          attr: template
+          version: 2.2.0
+          select: LWIP httpd Demo
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/include
+          category: include
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/cache.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/mpu.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/pm.c
+          category: source
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/sau_tcm_ns_setup.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/startup.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/system.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/tgu.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/core/common/source/vectors.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include
+          category: include
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/soc/AE822FA0E5597/include/rtss_hp
+          category: include
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/system/include
+          category: include
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/system/source/sys_clocks.c
+          category: sourceC
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/Device/system/source/sys_utils.c
+          category: sourceC
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/RTE_Device.h
+          category: header
+          attr: config
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/app_mem_regions.h
+          category: header
+          attr: config
+          version: 3.0.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/app_tz.h
+          category: header
+          attr: config
+          version: 2.1.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/core_config.h
+          category: header
+          attr: config
+          version: 2.1.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/linker_gnu_mram.ld.src
+          category: linkerScript
+          attr: config
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/linker_gnu_tcm.ld.src
+          category: linkerScript
+          attr: config
+          version: 2.1.0
+    - component: AlifSemiconductor::Services:Retarget IO:STDOUT@2.2.0
+      condition: Retarget IO STDOUT
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Services:Retarget IO:STDOUT
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/retarget_io/include/retarget_init.h
+          category: header
+          version: 2.2.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/libs/retarget_io/source/stdout_USART.c
+          category: source
+          version: 2.2.0
+        - file: ../../../../M55_HP/RTE/Services/AE822FA0E5597LS0_M55_HP/retarget_config.h
+          category: header
+          attr: config
+          version: 2.1.0
+    - component: AlifSemiconductor::Services:Secure Enclave:Initialization Helper&Source@1.110.0
+      condition: SE SERVICES INIT
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Services:Secure Enclave:Initialization Helper&Source
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/port/clock_runtime.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/port/include
+          category: include
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/port/se_services_port.c
+          category: source
+          version: 1.110.0
+    - component: AlifSemiconductor::Services:Secure Enclave:core&Source@1.110.0
+      condition: SE SERVICES SRC
+      from-pack: AlifSemiconductor::Ensemble@2.2.0
+      selected-by: Services:Secure Enclave:core&Source
+      files:
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/document/SE_Host_Services_API_v1.110.0.pdf
+          category: doc
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/include
+          category: include
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_application.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_boot.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_clocks.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_cryptocell.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_error.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_extsys0.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_handler.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_maintenance.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_padcontrol.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_pinmux.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_power.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_system.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/source/services_host_update.c
+          category: source
+          version: 1.110.0
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/templates/m55_services_main.c
+          category: source
+          attr: template
+          version: 1.110.0
+          select: SE Services Example
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/templates/services_lib_interface.c
+          category: source
+          attr: template
+          version: 1.110.0
+          select: SE Services Example
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/templates/services_lib_interface.h
+          category: header
+          attr: template
+          version: 1.110.0
+          select: SE Services Example
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/templates/services_test.c
+          category: source
+          attr: template
+          version: 1.110.0
+          select: SE Services Example
+        - file: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/se_services/templates/services_test_crypto.c
+          category: source
+          attr: template
+          version: 1.110.0
+          select: SE Services Example
+  apis:
+    - api: CMSIS Driver:USART@2.4.0
+      from-pack: ARM::CMSIS@6.3.0
+      implemented-by: AlifSemiconductor::CMSIS Driver:USART@2.2.0
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Documentation/html/Driver/group__usart__interface__gr.html
+          category: doc
+          version: 2.4.0
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Driver/Include/Driver_USART.h
+          category: header
+          version: 2.4.0
+    - api: CMSIS-Compiler:STDOUT@1.1.0
+      condition: CortexDevice
+      from-pack: ARM::CMSIS-Compiler@2.3.0
+      implemented-by: ARM::CMSIS-Compiler:STDOUT:Custom@1.1.0
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS-Compiler/2.3.0/include/retarget_stdout.h
+          category: header
+          version: 1.1.0
+    - api: CMSIS:OS Tick@1.0.1
+      from-pack: ARM::CMSIS@6.3.0
+      implemented-by: ARM::CMSIS:OS Tick:SysTick@1.0.5
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include/os_tick.h
+          category: header
+          version: 1.0.1
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Documentation/html/RTOS2/group__CMSIS__RTOS__TickAPI.html
+          category: doc
+          version: 1.0.1
+    - api: CMSIS:RTOS2@2.3.0
+      from-pack: ARM::CMSIS@6.3.0
+      implemented-by: ARM::CMSIS:RTOS2:Keil RTX5&Source@5.9.1
+      files:
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/Documentation/html/RTOS2/group__CMSIS__RTOS.html
+          category: doc
+          version: 2.3.0
+        - file: ${CMSIS_PACK_ROOT}/ARM/CMSIS/6.3.0/CMSIS/RTOS2/Include/cmsis_os2.h
+          category: header
+          version: 2.3.0
+  linker:
+    script: ../../../../M55_HP/RTE/Device/AE822FA0E5597LS0_M55_HP/linker_gnu_mram.ld.src
+  groups:
+    - group: Source Files
+      files:
+        - file: ../../../../M55_HP/main.cpp
+          category: sourceCpp
+        - file: ../../../../M55_HP/app_utils.h
+          category: header
+    - group: csp4cmsis
+      files:
+        - file: ../../../../../csp4cmsis/src/sync_channel.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/kernel.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/alternative.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/csp_wrapper.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/glue.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/channel_sync.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/barrier.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/alt_channel_sync.cpp
+          category: sourceCpp
+        - file: ../../../../../csp4cmsis/src/buffered_channel.cpp
+          category: sourceCpp
+    - group: Application
+      files:
+        - file: ../../../../../application.cpp
+          category: sourceCpp
+  constructed-files:
+    - file: ../../../../M55_HP/RTE/_Release_DevKit-E8/RTE_Components.h
+      category: header
+  licenses:
+    - license: <unknown>
+      license-agreement: ${CMSIS_PACK_ROOT}/AlifSemiconductor/Ensemble/2.2.0/License.txt
+      packs:
+        - pack: AlifSemiconductor::Ensemble@2.2.0
+      components:
+        - component: AlifSemiconductor::BSP:Board Config@2.2.0
+        - component: AlifSemiconductor::BSP:DevKit Config&DevKit-e8@2.2.0
+        - component: AlifSemiconductor::CMSIS Driver:USART@2.2.0
+        - component: AlifSemiconductor::Device:SOC Peripherals:GPIO@2.2.0
+        - component: AlifSemiconductor::Device:SOC Peripherals:MHU@1.110.0
+        - component: AlifSemiconductor::Device:SOC Peripherals:PINCONF@2.2.0
+        - component: AlifSemiconductor::Device:Startup@2.2.0
+        - component: AlifSemiconductor::Services:Retarget IO:STDOUT@2.2.0
+        - component: AlifSemiconductor::Services:Secure Enclave:Initialization Helper&Source@1.110.0
+        - component: AlifSemiconductor::Services:Secure Enclave:core&Source@1.110.0
+    - license: Apache-2.0
+      packs:
+        - pack: ARM::CMSIS-Compiler@2.3.0
+        - pack: ARM::CMSIS-RTX@5.9.1
+        - pack: ARM::CMSIS@6.3.0
+      components:
+        - component: ARM::CMSIS-Compiler:CORE@1.2.1
+        - component: ARM::CMSIS-Compiler:STDOUT:Custom@1.1.0
+        - component: ARM::CMSIS:CORE@6.2.0
+        - component: ARM::CMSIS:OS Tick:SysTick@1.0.5
+        - component: ARM::CMSIS:RTOS2:Keil RTX5&Source@5.9.1
+        - component: CMSIS Driver:USART(API)
+        - component: CMSIS-Compiler:STDOUT(API)
+        - component: CMSIS:OS Tick(API)
+        - component: CMSIS:RTOS2(API)

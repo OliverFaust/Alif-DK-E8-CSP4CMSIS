@@ -15,3 +15,6 @@ cbuild-pack:
     - resolved-pack: AlifSemiconductor::Ensemble@2.2.0
       selected-by-pack:
         - AlifSemiconductor::Ensemble@^2.2.0-0
+    - resolved-pack: OliverFaust::CSP4CMSIS@1.0.0
+      selected-by-pack:
+        - OliverFaust::CSP4CMSIS@1.0.0

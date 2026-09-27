@@ -1,0 +1,9 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=source_dir
+command=
+source_dir=/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8
+work_dir=
+

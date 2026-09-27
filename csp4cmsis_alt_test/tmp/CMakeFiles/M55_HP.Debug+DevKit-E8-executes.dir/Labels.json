@@ -1,0 +1,40 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/CMakeFiles/M55_HP.Debug+DevKit-E8-executes"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/CMakeFiles/M55_HP.Debug+DevKit-E8-executes.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-executes.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-build.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-configure.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-patch.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-update.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-download.rule"
+		},
+		{
+			"file" : "/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test/tmp/M55_HP.Debug+DevKit-E8/src/M55_HP.Debug+DevKit-E8-stamp/M55_HP.Debug+DevKit-E8-mkdir.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"M55_HP.Debug+DevKit-E8"
+		],
+		"name" : "M55_HP.Debug+DevKit-E8-executes"
+	}
+}
