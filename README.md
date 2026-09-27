@@ -52,6 +52,29 @@ arm-none-eabi-gcc --version
 > for the current release if `13.3.rel1` is no longer the latest — the
 > filename in the URL will need updating to match.
 
+**This alone is not enough for CMSIS-Toolbox.** Putting the compiler on
+`PATH` lets you run it directly, but `csolution`/`cbuild` deliberately
+don't rely on `PATH` to find toolchains — picking up whatever `gcc`
+happens to resolve to is explicitly *not* how Arm's own tooling wants this
+done. Instead it requires **explicit toolchain registration** via an
+environment variable named `GCC_TOOLCHAIN_<major>_<minor>_<patch>`,
+pointing at the compiler's `bin/` directory. Without this, `csolution`/
+`cbuild` report `warning csolution: No compiler registered` and the build
+won't proceed.
+
+```bash
+arm-none-eabi-gcc --version
+# e.g. "arm-none-eabi-gcc (Arm GNU Toolchain 13.3.rel1) 13.3.1 20240614" -> use 13_3_1
+
+echo 'export GCC_TOOLCHAIN_13_3_1="$HOME/tools/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin"' >> ~/.bashrc
+source ~/.bashrc
+```
+> The version numbers in the variable name come from the *underlying GCC
+> version* reported by `arm-none-eabi-gcc --version` (e.g. `13.3.1`), not
+> from Arm's release label (`13.3.rel1`) — check your actual `--version`
+> output rather than assuming these match, and update the variable name
+> if you installed a different version.
+
 ### 3. CMSIS-Toolbox (`csolution`, `cbuild`, `cpackget`)
 
 ```bash
