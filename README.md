@@ -83,8 +83,18 @@ pack has to be added explicitly, once, before any of the examples in this
 repo can build:
 
 ```bash
-cpackget add https://github.com/OliverFaust/CSP4CMSIS/releases/latest/download/OliverFaust.CSP4CMSIS.pdsc
+cpackget add https://github.com/OliverFaust/CSP4CMSIS/releases/download/v1.0.0/OliverFaust.CSP4CMSIS.1.0.0.pack
 ```
+
+> Confirmed working: fetch the `.pack` archive directly (not the bare
+> `.pdsc`) from the concrete, versioned release URL — not
+> `releases/latest/download/...`. `cpackget add` handles a `.pdsc`-only
+> URL as a local-file reference (for active pack development), not a
+> remote fetch; the `.pack` archive is the installable unit and is what
+> actually downloads over HTTPS. Add `-F`/`--force-reinstall` if you need
+> to reinstall an already-installed version. Update to a newer CSP4CMSIS
+> release deliberately by changing the version in the URL, or via
+> `cpackget update OliverFaust::CSP4CMSIS`.
 
 Confirm it registered correctly:
 ```bash
@@ -207,6 +217,12 @@ present.
 > this note once done) rather than treating this section as hardware-
 > proven on the strength of the dry-run flag checks alone.
 
+## Repository structure note
+
+This repo's history was extracted with `git filter-repo` from a larger
+development sandbox, preserving the real commit-by-commit history of each
+project's CMSIS-RTOS2 migration and hardware validation — not squashed
+into a single import commit.
 
 ## License
 
