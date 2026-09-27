@@ -149,6 +149,13 @@ portal, under the Ensemble/DK-E8 SDK download) — not redistributed here.
 Once obtained, note the install path; it's referenced in the flashing
 section below.
 
+Extract the SETOOLS package into the repository at `tools/setools/app-release-exec-linux/`:
+
+```bash
+mkdir -p tools/setools
+# Extract your downloaded Alif SETOOLS package into tools/setools/app-release-exec-linux
+```
+
 ## Clone
 
 ```bash
@@ -201,18 +208,27 @@ cbuild CSP4CMSIS_AltTest.csolution.yml -c M55_HP.Debug+DevKit-E8
 Output lands at
 `csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin`.
 
+### Flash: Step 2. Stage the binary and generate the APP TOC package
+
+Added `mkdir -p` steps and staging for `app-cfg-alt-test.json`:
+
 ### 2. Stage the binary and generate the APP TOC package
 
+Ensure the output directories exist inside SETOOLS, then copy both the compiled binary and the project's tracked SETOOLS configuration (`app-cfg-alt-test.json`) into the build tree:
+
 ```bash
+mkdir -p tools/setools/app-release-exec-linux/build/images \
+         tools/setools/app-release-exec-linux/build/config
+
 cp csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin \
    tools/setools/app-release-exec-linux/build/images/csp4cmsis_alt_test_hp.bin
+
+cp csp4cmsis_alt_test/app-cfg-alt-test.json \
+   tools/setools/app-release-exec-linux/build/config/app-cfg-alt-test.json
 
 cd tools/setools/app-release-exec-linux
 ./app-gen-toc -f build/config/app-cfg-alt-test.json -o build/AppTocPackage.bin
 ```
-`app-cfg-alt-test.json` already carries `csp4cmsis_alt_test`'s target
-MRAM address and CPU id — don't reuse another project's config against
-this binary, or vice versa.
 
 ### 3. Burn it to the board over serial
 
