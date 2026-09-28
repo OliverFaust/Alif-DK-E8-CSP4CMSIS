@@ -80,6 +80,11 @@ cbuild --version
 cpackget --version
 ```
 
+Don't be alarmed by the numbers these print. `cbuild --version` shows
+`2.14.0` and `cpackget --version` shows `2.2.1`: those are the versions of
+the individual tools inside CMSIS-Toolbox 2.14.1. The toolbox release
+itself is recorded in `~/tools/cmsis-toolbox-linux-amd64/manifest_2.14.1.yml`.
+
 ## 4. Initialise the pack root
 
 ```bash
@@ -94,9 +99,16 @@ cpackget init https://www.keil.com/pack/index.pidx
 self-hosted on GitHub Releases. Add it once, explicitly, before building:
 
 ```bash
-cpackget add https://github.com/OliverFaust/CSP4CMSIS/releases/download/v1.0.0/OliverFaust.CSP4CMSIS.1.0.0.pack
+cpackget add -a https://github.com/OliverFaust/CSP4CMSIS/releases/download/v1.0.0/OliverFaust.CSP4CMSIS.1.0.0.pack
 cpackget list      # should include OliverFaust::CSP4CMSIS@1.0.0
 ```
+
+`-a` accepts the pack's embedded MIT licence. Without it, `cpackget`
+prints the licence and asks `[A]ccept [D]ecline [E]xtract`. If you don't
+answer, it installs nothing and `cpackget list` shows
+`(no packs installed)`. To read the licence first, run the command without
+`-a` and answer `A`. The other packs downloaded in step 6 need no such
+step: `--packs` accepts their licences itself.
 
 Use the `.pack` archive at the versioned release URL. A bare `.pdsc` URL
 is treated as a local file reference and fails, and the
@@ -244,7 +256,7 @@ before and are a harmless UART artefact.
 
 ## Verification status
 
-- **Build (Part 1).** Debug and Release built from a fresh clone with CMSIS-Toolbox 2.14.1 and GCC 14.2.1, with all CSP4CMSIS sources coming from the pack. The build ran on a machine that already had the Alif packs installed. A build on a completely empty pack root has not yet been recorded.
+- **Build (Part 1).** Followed step by step in a fresh `ubuntu:24.04` container with an empty pack root. The only defect found was the missing `-a` in step 5, now fixed above. With it, `csp4cmsis_alt_test` built in Debug and Release using GCC 14.2.1 and CMSIS-Toolbox 2.14.1, with all eight CSP4CMSIS sources coming from the pack. Part 1 took about 4.5 minutes and about 225 MB of downloads. `csp4cmsis_pack_test` and `neuropathway` did not build in that test and are being fixed.
 - **Flash (Part 2).** The command shapes are confirmed against the SETOOLS binaries and config files. A full burn-and-boot run from these instructions on a clean machine has not yet been recorded. The SW4 positions and the console baud rate are unconfirmed (see above).
 
 ## License
