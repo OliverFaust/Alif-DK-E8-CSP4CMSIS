@@ -14,10 +14,12 @@ DK-E8 hardware.
   here.**
 - **`csp4cmsis_pack_test/`** — proves CSP4CMSIS is installable and usable
   as a CMSIS-Pack (`OliverFaust::CSP4CMSIS`), not just as raw source.
-- **`neuropathway/`** — the CSP book's "Neuropathway" vision pipeline
-  (Camera → Inference → Console, as a CSP process network). It has extra
-  dependencies (inference runtime, model files) that this README does not
-  cover; build `csp4cmsis_alt_test` first.
+- **`neuropathway/`** — the CSP book's "Neuropathway" pipeline, adapted
+  to the IMU: an ICM-42670 accelerometer feeds 128-sample windows to an
+  ExecuTorch model on the Ethos-U55 NPU, which classifies them as WALKING
+  or LAYING (Sensor → Inference → Console, as a CSP process network). It
+  needs an extra pack; see [Building neuropathway](#building-neuropathway).
+  Build `csp4cmsis_alt_test` first.
 
 All three consume CSP4CMSIS as a packaged component
 (`OliverFaust::CSP4CMSIS:Core`) rather than embedding the library source.
@@ -140,6 +142,48 @@ Output: `out/M55_HP/DevKit-E8/<Debug|Release>/M55_HP.bin`
 **Part 1 ends here.** A successful build means the toolchain, pack
 registration and CSP4CMSIS component all work on your machine.
 
+## Building neuropathway
+
+`neuropathway` needs more than `csp4cmsis_alt_test`, so build
+`csp4cmsis_alt_test` first (steps 1 to 6 above). Then fetch the ExecuTorch
+pack, from the repository root:
+
+```bash
+cd ~/Alif-DK-E8-CSP4CMSIS
+./scripts/fetch_executorch_pack.sh
+```
+
+and build:
+
+```bash
+cd neuropathway
+cbuild Neuropathway.csolution.yml --packs -c M55_HP.Release+DevKit-E8      # or Debug
+```
+
+Output: `neuropathway/out/M55_HP/DevKit-E8/<Debug|Release>/M55_HP.bin`
+
+What the script does:
+
+- It fetches only the `packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12/`
+  directory of [ModelNova](https://github.com/Arm-Examples/ModelNova) at
+  commit `1826b9883e94ed6059f8fee11f9e787eb2c64a19` into
+  `tools/modelnova/`, which is where `Neuropathway.csolution.yml` looks for
+  it. That is about 2 MB of download and 26 MB on disk. `tools/modelnova/`
+  is ignored by git.
+- The pack is BSD 3-Clause licensed (Meta Platforms, Inc. and affiliates);
+  see its `LICENSE` file.
+- Running it again does nothing if the pack is already there.
+  `--force` deletes `tools/modelnova/` and fetches it again.
+
+`ARM::ethos-u-core-driver` needs no extra step: `--packs` installs it from
+the public pack index.
+
+**Caveat.** This is a 1.1.0-rc1 build of the ExecuTorch pack that ModelNova
+has since removed from its main branch, so the script depends on that old
+commit staying available on GitHub. If it disappears, the pack has to be
+hosted elsewhere, or `neuropathway` moved to a newer ExecuTorch pack from
+the public index (which renames some of the components it uses).
+
 ---
 
 # Part 2 — Flash and run (needs a DK-E8)
@@ -256,7 +300,7 @@ before and are a harmless UART artefact.
 
 ## Verification status
 
-- **Build (Part 1).** Followed step by step in a fresh `ubuntu:24.04` container with an empty pack root. The only defect found was the missing `-a` in step 5, now fixed above. With it, `csp4cmsis_alt_test` built in Debug and Release using GCC 14.2.1 and CMSIS-Toolbox 2.14.1, with all eight CSP4CMSIS sources coming from the pack. Part 1 took about 4.5 minutes and about 225 MB of downloads. `csp4cmsis_pack_test` and `neuropathway` did not build in that test and are being fixed.
+- **Build (Part 1).** Followed step by step in a fresh `ubuntu:24.04` container with an empty pack root. The only defect found was the missing `-a` in step 5, now fixed above. With it, `csp4cmsis_alt_test` built in Debug and Release using GCC 14.2.1 and CMSIS-Toolbox 2.14.1, with all eight CSP4CMSIS sources coming from the pack. Part 1 took about 4.5 minutes and about 225 MB of downloads. In the same kind of container, `csp4cmsis_pack_test` built in Debug and Release (`cbuild CSP4CMSIS_PackTest.csolution.yml --packs`), also with all eight CSP4CMSIS sources from the pack, and `neuropathway` built in Debug and Release following [Building neuropathway](#building-neuropathway): the script fetched about 2 MB in a few seconds, and each build took under 20 seconds.
 - **Flash (Part 2).** The command shapes are confirmed against the SETOOLS binaries and config files. A full burn-and-boot run from these instructions on a clean machine has not yet been recorded. The SW4 positions and the console baud rate are unconfirmed (see above).
 
 ## License
