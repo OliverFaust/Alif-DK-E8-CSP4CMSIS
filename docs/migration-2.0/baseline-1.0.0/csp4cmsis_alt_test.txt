@@ -1,7 +1,10 @@
 # project: csp4cmsis_alt_test, build type Debug, GCC 14.2.1, CMSIS-Toolbox 2.14.0 (Alif SDK), CSP4CMSIS 1.0.0 (pack)
-# repo: Alif-DK-E8-CSP4CMSIS @ 19cb50d (branch csp4cmsis-2.0-migration)
-# image: csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin sha256=ea69118badda66ce; flashed with SETOOLS, config app-cfg-alt-test.json(repo)
+# repo: Alif-DK-E8-CSP4CMSIS @ 4631bad (branch csp4cmsis-2.0-migration), RTX5 with OS_STACK_WATERMARK 1
+# image: csp4cmsis_alt_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin sha256=4ba57d509bbc213e; flashed with SETOOLS, config app-cfg-alt-test.json (repo)
 # board: Alif DevKit-E8 AE822FA0E5597LS0 rev A1; console captured with minicom, 2026-09-29
+# Replaces the first baseline (3cff124): with OS_STACK_WATERMARK 0 the stack report printed 0 bytes
+# free for every thread, so it carried no stack figures. The SUCCESS line below lost its start
+# ("[Receiver] SUCCESS: 20") to interleaved output from another thread.
 ?
 csp4cmsis Alternation smoke test (RTSS-HP, DK-E8) starting
 RunProcessingChainTest() returned, starting scheduler...
@@ -30,22 +33,23 @@ RunProcessingChainTest() returned, starting scheduler...
 [Receiver] Verified 17000 messages...
 [Receiver] Verified 18000 messages...
 [Receiver] Verified 19000 messages...
-[Render 1] Finished.
-000 messages...
-[Receiver] SUCCESS: 20000 messages verified heap-free.
-MainApp: 0 bytes unused headroom (0 words HWM, of 4096 allocated)
-Snd1: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Snd2: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Receiver: 4096/4096 bytes used (0 bytes unused headroom, 0 words HWM)
-MainApp: 0 bytes unused headroom (0 words HWM, of 4096 allocated)
-Snd1: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Snd2: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Receiver: 4096/4096 bytes used (0 bytes unused headroom, 0 words HWM)
-MainApp: 0 bytes unused headroom (0 words HWM, of 4096 allocated)
-Snd1: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Snd2: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Receiver: 4096/4096 bytes used (0 bytes unused headroom, 0 words HWM)
-MainApp: 0 bytes unused headroom (0 words HWM, of 4096 allocated)
-Snd1: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Snd2: 2048/2048 bytes used (0 bytes unused headroom, 0 words HWM)
-Receiver: 4096/4096 bytes used (0 bytes unused headroom, 0 words HWM)
+[Sender 1] Finished.
+[Receiver] Verified 20000 messages...
+[Receer 2] Finished.
+000 messages verified heap-free.
+MainApp: 15720 bytes unused headroom (3930 words HWM, of 4096 allocated)
+Snd1: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Snd2: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Receiver: 664/4096 bytes used (3432 bytes unused headroom, 858 words HWM)
+MainApp: 15720 bytes unused headroom (3930 words HWM, of 4096 allocated)
+Snd1: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Snd2: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Receiver: 664/4096 bytes used (3432 bytes unused headroom, 858 words HWM)
+MainApp: 15720 bytes unused headroom (3930 words HWM, of 4096 allocated)
+Snd1: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Snd2: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Receiver: 664/4096 bytes used (3432 bytes unused headroom, 858 words HWM)
+MainApp: 15720 bytes unused headroom (3930 words HWM, of 4096 allocated)
+Snd1: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Snd2: 488/2048 bytes used (1560 bytes unused headroom, 390 words HWM)
+Receiver: 664/4096 bytes used (3432 bytes unused headroom, 858 words HWM)
