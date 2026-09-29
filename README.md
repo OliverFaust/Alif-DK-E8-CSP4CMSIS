@@ -303,7 +303,13 @@ before and are a harmless UART artefact.
 - **Build (Part 1).** Followed step by step in a fresh `ubuntu:24.04` container with an empty pack root. The only defect found was the missing `-a` in step 5, now fixed above. With it, `csp4cmsis_alt_test` built in Debug and Release using GCC 14.2.1 and CMSIS-Toolbox 2.14.1, with all eight CSP4CMSIS sources coming from the pack. Part 1 took about 4.5 minutes and about 225 MB of downloads. In the same kind of container, `csp4cmsis_pack_test` built in Debug and Release (`cbuild CSP4CMSIS_PackTest.csolution.yml --packs`), also with all eight CSP4CMSIS sources from the pack, and `neuropathway` built in Debug and Release following [Building neuropathway](#building-neuropathway): the script fetched about 2 MB in a few seconds, and each build took under 20 seconds.
 - **Flash (Part 2).** The command shapes are confirmed against the SETOOLS binaries and config files. A full burn-and-boot run from these instructions on a clean machine has not yet been recorded. The SW4 positions and the console baud rate are unconfirmed (see above).
 
-## License
+## Licensing
 
-See [`LICENSE`](LICENSE). *(TODO: confirm this repository has its own
-license file before publishing.)*
+- The repository's own code and documentation: MIT, see [`LICENSE`](LICENSE).
+- Third-party files, listed one by one in
+  [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md): Alif Semiconductor configuration, linker and
+  template files under the Alif Semiconductor Software License Agreement, and Arm files under the
+  Apache License 2.0 (texts in [`LICENSES/`](LICENSES/)). Every file keeps its original header.
+- **The Alif files may only be used with and executed on Alif Semiconductor devices.**
+
+Not affiliated with or endorsed by Alif Semiconductor.
