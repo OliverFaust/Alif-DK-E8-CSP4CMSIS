@@ -1,0 +1,59 @@
+# CSP4CMSIS 2.0 regression suite on the DK-E8 (hardware test plan, stage 1).
+# The FVP suite (CSP4CMSIS tests/fvp_sse300/bc_tests.cpp) ported to RTSS-HP.
+# Build and run with ./hwtest.sh, which selects the library under test and
+# records its commit (see README.md in this directory).
+solution:
+  created-for: CMSIS-Toolbox@2.14.1
+  cdefault: # use the cdefault.yml next to this file
+
+  # Default toolchain; hwtest.sh passes --toolchain AC6 or GCC explicitly.
+  compiler: GCC
+  select-compiler:
+    - compiler: GCC
+    - compiler: AC6
+
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.2.0-0
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Compiler@^2.1.0
+    - pack: ARM::CMSIS-FreeRTOS@^11.3.0
+    - pack: ARM::CMSIS-RTX@^5.9.1
+
+  target-types:
+    - type: DevKit-E8
+      board: DevKit-E8
+      device: AE822FA0E5597LS0
+
+  # One build type per CMSIS-RTOS2 backend, plus the heap-free variants, as in
+  # the FVP harness. No optimize: key: the compiler default (-O0) is kept.
+  build-types:
+    - type: RTX5
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+    - type: FreeRTOS
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+    # Heap-free proof: RTOS dynamic allocation disabled (see the FVP README,
+    # "Heap-free proof").
+    - type: RTX5-NoHeap
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+        - OS_DYNAMIC_MEM_SIZE: 0
+        # Arm C library stream mutexes (rtx_lib.c _mutex_initialize()) come
+        # from RTX5's static mutex pool instead of dynamic memory.
+        - OS_MUTEX_OBJ_MEM: 1
+        - OS_MUTEX_NUM: 8
+    - type: FreeRTOS-NoHeap
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+        - configSUPPORT_DYNAMIC_ALLOCATION: 0
+      misc:
+        # CMSIS-FreeRTOS 11.3.0 clib_os.c workaround (see noheap_shim.h).
+        - C-CPP:
+            - -include $ProjectDir()$/noheap_shim.h
+
+  output-dirs:
+    outdir: ./out/$TargetType$/$BuildType$/$Compiler$/
+
+  projects:
+    - project: M55_HP/M55_HP.cproject.yml

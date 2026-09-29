@@ -1,0 +1,7 @@
+out/
+tmp/
+M55_HP/lib_version.h
+M55_HP/csp4cmsis_under_test
+*.cbuild-idx.yml
+*.cbuild.yml
+*.cbuild-run.yml

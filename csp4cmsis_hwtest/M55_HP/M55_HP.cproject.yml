@@ -1,0 +1,98 @@
+project:
+  device: :M55_HP
+
+  packs:
+    # The library under test, loaded as a local pack from the tree that the
+    # symlink ./csp4cmsis_under_test points to (set by hwtest.sh: the
+    # CSP4CMSIS working tree, or the v1.0.0 worktree). Not installed with
+    # cpackget; an installed OliverFaust::CSP4CMSIS is not used.
+    - pack: OliverFaust::CSP4CMSIS
+      path: ./csp4cmsis_under_test
+
+  # CSP4CMSIS is C++17; set at project level so it also applies to the pack
+  # component's own sources.
+  language-CPP: c++17
+
+  define:
+    - CSP4CMSIS_STATIC_ALLOCATION
+    # Unshifted; __NVIC_PRIO_BITS is 8 on RTSS-HP, so BASEPRI = 128. Matches
+    # configMAX_SYSCALL_INTERRUPT_PRIORITY in RTE/RTOS/FreeRTOSConfig.h.
+    - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
+    # Harness platform parameters (bc_tests.cpp, "platform parameters").
+    # CANFD0 is unused here; CANFD0_IRQHandler is resolved into the MRAM vector
+    # table at link time (weak alias in the Ensemble pack's vectors.c).
+    - BC_SWI_IRQn: CANFD0_IRQ_IRQn
+    - BC_SWI_HANDLER: CANFD0_IRQHandler
+    - BC_SWI_PRIO: 192
+    - BC_SEARCH_HI: 400000u
+    - BC_SWEEP_BELOW: 1500u
+    - BC_SWEEP_ABOVE: 1000u
+
+  groups:
+    - group: Source Files
+      files:
+        - file: ./main.cpp
+    - group: CSP4CMSIS tests
+      files:
+        - file: ./bc_tests.cpp
+        - file: ./noheap_stubs.c
+          for-context: .FreeRTOS-NoHeap
+
+  components:
+    - component: OliverFaust::CSP4CMSIS:Core
+
+    - component: CMSIS:CORE
+    - component: Device:Startup
+    - component: Device:SOC Peripherals:GPIO
+    - component: Device:SOC Peripherals:PINCONF
+    - component: Device:SOC Peripherals:MHU
+    - component: BSP:DevKit Config&DevKit-e8
+    - component: BSP:Board Config
+    - component: Services:Retarget IO:STDOUT
+    - component: Services:Secure Enclave:Initialization Helper&Source
+    - component: Services:Secure Enclave:core&Source
+    - component: CMSIS Driver:USART
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDOUT:Custom
+    - component: CMSIS:OS Tick:SysTick
+
+    # RTX5 build types
+    - component: CMSIS:RTOS2:Keil RTX5&Source
+      for-context: [.RTX5, .RTX5-NoHeap]
+
+    # FreeRTOS build types: CMSIS-RTOS2 adapter over FreeRTOS 11.3.0
+    - component: CMSIS:RTOS2:FreeRTOS&Cortex-M
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+    - component: RTOS&FreeRTOS:Core&Cortex-M
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+    - component: RTOS&FreeRTOS:Config&CMSIS RTOS2
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+    - component: RTOS&FreeRTOS:Heap&Heap_4          # not in NoHeap: heap_4.c needs dynamic allocation
+      for-context: [.FreeRTOS]
+    - component: RTOS&FreeRTOS:Timers
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+    - component: RTOS&FreeRTOS:Event Groups
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+
+  misc:
+    - for-compiler: GCC
+      CPP:
+        - -fno-exceptions
+        - -fno-rtti
+      # Test T2: GNU ld equivalent of armlink $Sub$$ patching (count
+      # CMSIS-RTOS2 calls made with BASEPRI raised).
+      Link:
+        - -Wl,--wrap=osEventFlagsSet,--wrap=osThreadFlagsSet,--wrap=osSemaphoreRelease
+        - -Wl,--wrap=osSemaphoreAcquire,--wrap=osMessageQueuePut,--wrap=osMessageQueueGet
+        - -Wl,--wrap=osMessageQueueGetCount,--wrap=osMessageQueueGetSpace
+        - -Wl,--wrap=osMutexAcquire,--wrap=osMutexRelease
+    - for-compiler: AC6
+      CPP:
+        - -fno-exceptions
+        - -fno-rtti
+
+  output:
+    type:
+      - elf
+      - bin
+      - map
