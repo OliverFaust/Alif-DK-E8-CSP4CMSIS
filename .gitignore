@@ -5,3 +5,11 @@ build/
 *.axf
 tools/setools/
 tools/modelnova/
+# CMSIS-Toolbox / CMake build output and generated build information
+# (*.cbuild-pack.yml is the pack lock file and stays tracked; RTE/ config too)
+tmp/
+*.cbuild-idx.yml
+*.cbuild.yml
+*.cbuild-run.yml
+*.cprj
+compile_commands.json

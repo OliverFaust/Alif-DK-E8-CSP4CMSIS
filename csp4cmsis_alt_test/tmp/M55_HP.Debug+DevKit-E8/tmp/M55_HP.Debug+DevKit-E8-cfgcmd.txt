@@ -1,1 +1,0 @@
-cmd='/usr/bin/cmake;-G;Ninja;-S;<SOURCE_DIR>;-B;<BINARY_DIR>;-DSOLUTION_ROOT=/home/oliver/Alif-DK-E8-CSP4CMSIS/csp4cmsis_alt_test;-DCMSIS_PACK_ROOT=/home/oliver/.cache/arm/packs;-DCMSIS_COMPILER_ROOT=/home/oliver/tools/cmsis-toolbox-linux-amd64/etc'
