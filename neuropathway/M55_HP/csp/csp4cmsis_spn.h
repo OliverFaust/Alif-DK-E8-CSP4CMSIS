@@ -6,8 +6,8 @@ extern "C" {
 #endif
 
 /* Builds and runs the Sensor/Inference/Console network (see
- * csp4cmsis_spn.cpp), then returns -- called once from main.cpp before
- * vTaskStartScheduler(), matching csp4cmsis_alt_test/
+ * csp4cmsis_spn.cpp), then returns -- called once from main.cpp between
+ * osKernelInitialize() and osKernelStart(), matching csp4cmsis_alt_test/
  * csp4cmsis_neuropathway's own RunProcessingChainTest() entry point. */
 void RunProcessingChainTest(void);
 
