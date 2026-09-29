@@ -37,6 +37,7 @@ project:
         - file: ./bc_tests.cpp
         - file: ./noheap_stubs.c
           for-context: .FreeRTOS-NoHeap
+        - file: ./hw_checks.inc      # included by bc_tests.cpp (RTX5-HwCheck)
 
   components:
     - component: OliverFaust::CSP4CMSIS:Core
@@ -58,7 +59,7 @@ project:
 
     # RTX5 build types
     - component: CMSIS:RTOS2:Keil RTX5&Source
-      for-context: [.RTX5, .RTX5-NoHeap]
+      for-context: [.RTX5, .RTX5-NoHeap, .RTX5-HwCheck, .RTX5-Soak]
 
     # FreeRTOS build types: CMSIS-RTOS2 adapter over FreeRTOS 11.3.0
     - component: CMSIS:RTOS2:FreeRTOS&Cortex-M

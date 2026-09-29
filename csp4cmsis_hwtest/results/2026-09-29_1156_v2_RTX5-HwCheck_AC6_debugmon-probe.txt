@@ -1,0 +1,42 @@
+# NOTE: first latency method (DebugMonitor itself as the probe). Masked-time triggers are dropped, so the prio-160 latencies are biased; superseded by the probe-IRQ run. The image sha256 below is of the rebuilt image, not this run.
+# config: lib=v2 build type=RTX5-HwCheck toolchain=AC6
+# library: <CSP4CMSIS checkout> @ c60665d8f47cb6c9448c3d39de0ad8adbf76bd2c dirty=0
+# harness: Alif-DK-E8-CSP4CMSIS @ fdb690661ccf46e96bc64f7908e445f4e6b823d6
+# image: <repo>/csp4cmsis_hwtest/out/DevKit-E8/RTX5-HwCheck/AC6/M55_HP.bin sha256=6d9f810664201f1d
+# console: last run in <console log> (minicom log), collected 2026-09-29T11:56:15+01:00
+=== HWTEST header ===
+board: Alif DevKit-E8, AE822FA0E5597LS0, core M55_HP; SystemCoreClock=400000000 Hz
+caches: I=on D=on
+library: v2 (v1.0.0-46-gc60665d) commit c60665d8f47cb6c9448c3d39de0ad8adbf76bd2c
+build type: RTX5-HwCheck; toolchain: AC6 (Arm Compiler Clang 20.0.0git)
+rtos: RTX V5.9.1 (api 20030000, kernel 50090001); tick 1000 Hz
+CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY=128 (__NVIC_PRIO_BITS=8); SWI IRQ 104 at priority 192
+sweep: search hi=400000u, range kb-1500u..kb+1000u
+
+=== CSP4CMSIS hardware-only checks ===
+backend: Keil RTX5 5.9.1; library: v2 API (ring buffer); RTOS heap enabled
+   [LAT] SystemCoreClock=400000000 Hz; SWI priority 192; threshold 128
+   [LAT] putFromISR 4 B, KeepNewest full (copy only)  n=256 min=158 avg=158 max=158 cycles
+   [LAT] putFromISR 4 B, Block, reader waiting        n=256 min=916 avg=918 max=1554 cycles
+   [LAT] putFromISR 64 B, KeepNewest full (copy only) n=256 min=211 avg=211 max=211 cycles
+   [LAT] putFromISR 64 B, Block, reader waiting       n=256 min=969 avg=969 max=1019 cycles
+   [LAT] putFromISR 1024 B, KeepNewest full (copy only) n=256 min=479 avg=479 max=479 cycles
+   [LAT] putFromISR 1024 B, Block, reader waiting     n=256 min=1272 avg=1272 max=1325 cycles
+   [LAT] DWT: NUMCOMP=8 FUNCTION0 readback=0x58000011; DHCSR.C_DEBUGEN=0; DEMCR=0x01110000 (MON_EN=1 SDME=1)
+   [LAT] latency, plain copies 4 B, DebugMon prio 64  n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 4 B, DebugMon prio 64 n=256 min=15 avg=15 max=16 cycles
+   [LAT] latency, plain copies 4 B, DebugMon prio 160 n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 4 B, DebugMon prio 160 n=185 min=15 avg=16 max=73 cycles
+   [LAT]   (71 of 256 triggers missed)
+   [LAT] latency, plain copies 64 B, DebugMon prio 64 n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 64 B, DebugMon prio 64 n=256 min=15 avg=15 max=16 cycles
+   [LAT] latency, plain copies 64 B, DebugMon prio 160 n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 64 B, DebugMon prio 160 n=138 min=15 avg=21 max=124 cycles
+   [LAT]   (118 of 256 triggers missed)
+   [LAT] latency, plain copies 1024 B, DebugMon prio 64 n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 1024 B, DebugMon prio 64 n=256 min=15 avg=15 max=16 cycles
+   [LAT] latency, plain copies 1024 B, DebugMon prio 160 n=256 min=15 avg=15 max=15 cycles
+   [LAT] latency, putFromISR copies 1024 B, DebugMon prio 160 n=62 min=15 avg=28 max=426 cycles
+   [LAT]   (194 of 256 triggers missed)
+RESULT LAT: PASS -- putFromISR() cost and interrupt latency measured (values above; judged in the report)
+SUMMARY: PASS=1 FAIL=0 SKIP=0 REPLACED=0

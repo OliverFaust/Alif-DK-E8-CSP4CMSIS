@@ -1152,6 +1152,11 @@ void runner(void*) {
            (unsigned long)osThreadGetStackSpace(osThreadGetId()));
     printf("\x04");
     fflush(stdout);
+#if defined(HWTEST_SOAK)
+    // DK-E8 soak (build type RTX5-Soak): restart and run the suite again.
+    osDelay(200);
+    NVIC_SystemReset();
+#endif
     park();
 }
 
@@ -1166,6 +1171,10 @@ extern "C" void HardFault_Handler(void) {
     for (;;) { }
 }
 
+#if defined(HWTEST_CHECKS)
+#include "hw_checks.inc"      // DK-E8 hardware-only checks: replace the suite runner
+#else
 extern "C" void csp_app_main_init(void) {
     spawn(runner, nullptr, osPriorityHigh, runner_slot, "runner");
 }
+#endif

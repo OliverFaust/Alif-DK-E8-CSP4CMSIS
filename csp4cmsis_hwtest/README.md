@@ -27,6 +27,12 @@ Test branch only.
 `RTX5`, `FreeRTOS` (CMSIS-FreeRTOS 11.3.0 adapter), `RTX5-NoHeap`, `FreeRTOS-NoHeap`, each with
 `--toolchain AC6` (6.24) or `GCC` (14.2.1), `-O0`. Output: `out/DevKit-E8/<build type>/<toolchain>/`.
 
+Hardware-only checks (RTX5):
+- `RTX5-HwCheck` (`M55_HP/hw_checks.inc`, replaces the suite runner): with v1.0.0, T16a with a
+  cycle-step sweep (0..31 NOPs per spin value; the ISR records the victim's preempted PC); with 2.0,
+  `putFromISR()` cost and interrupt latency (DWT cycle match -> DebugMonitor -> probe interrupt).
+- `RTX5-Soak`: the suite, restarted with `NVIC_SystemReset()` after every SUMMARY.
+
 ## Running
 
 ```sh

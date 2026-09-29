@@ -52,6 +52,19 @@ solution:
         - C-CPP:
             - -include $ProjectDir()$/noheap_shim.h
 
+    # Hardware-only checks (M55_HP/hw_checks.inc): T16a cycle-step sweep on
+    # v1.0.0, putFromISR() cost and interrupt latency on 2.0.
+    - type: RTX5-HwCheck
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+        - HWTEST_CHECKS
+        - CSP4CMSIS_ISR_MAX_ELEMENT_SIZE: 1024   # latency of a 1024-byte masked copy
+    # Soak: the suite, restarted by NVIC_SystemReset() after every SUMMARY.
+    - type: RTX5-Soak
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+        - HWTEST_SOAK
+
   output-dirs:
     outdir: ./out/$TargetType$/$BuildType$/$Compiler$/
 
