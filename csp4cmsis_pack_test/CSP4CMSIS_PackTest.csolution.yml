@@ -18,7 +18,7 @@ solution:
     - pack: ARM::CMSIS@^6.2.0
     - pack: ARM::CMSIS-Compiler@^2.1.0
     - pack: ARM::CMSIS-FreeRTOS@^11.3.0
-    - pack: OliverFaust::CSP4CMSIS@^1.0.0
+    - pack: OliverFaust::CSP4CMSIS@2.0.0
 
   # List different hardware targets that are used to deploy the solution.
   target-types:
