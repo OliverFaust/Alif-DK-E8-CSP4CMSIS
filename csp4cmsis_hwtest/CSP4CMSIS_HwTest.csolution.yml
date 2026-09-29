@@ -59,6 +59,39 @@ solution:
         - CSP4CMSIS_RTOS2_BACKEND_RTX5
         - HWTEST_CHECKS
         - CSP4CMSIS_ISR_MAX_ELEMENT_SIZE: 1024   # latency of a 1024-byte masked copy
+    - type: RTX5-HwCheck-O2
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+        - HWTEST_CHECKS
+        - CSP4CMSIS_ISR_MAX_ELEMENT_SIZE: 1024
+      misc:
+        - C-CPP:
+            - -O2
+    # Optimised builds of the suite (flag passed verbatim, as in the FVP harness).
+    - type: RTX5-O2
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+      misc:
+        - C-CPP:
+            - -O2
+    - type: RTX5-Os
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_RTX5
+      misc:
+        - C-CPP:
+            - -Os
+    - type: FreeRTOS-O2
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+      misc:
+        - C-CPP:
+            - -O2
+    - type: FreeRTOS-Os
+      define:
+        - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+      misc:
+        - C-CPP:
+            - -Os
     # Soak: the suite, restarted by NVIC_SystemReset() after every SUMMARY.
     - type: RTX5-Soak
       define:

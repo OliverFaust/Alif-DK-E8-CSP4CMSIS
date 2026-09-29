@@ -32,6 +32,18 @@
 
 extern "C" void csp_app_main_init(void);   // bc_tests.cpp
 
+// Console output that needs no stdio lock and no interrupts (fault reports):
+// polls the stdout UART (UART4, DesignWare 16550: THR +0x00, LSR +0x14, THRE bit 5).
+extern "C" void hwtest_raw_puts(const char* s)
+{
+    volatile uint32_t* const u = reinterpret_cast<volatile uint32_t*>(UART4_BASE);
+    for (; *s; ++s) {
+        while ((u[0x14 / 4] & 0x20u) == 0u) {
+        }
+        u[0] = static_cast<uint8_t>(*s);
+    }
+}
+
 #if defined(__ARMCC_VERSION)
 #define HWTEST_TOOLCHAIN "Arm Compiler " __VERSION__
 #else

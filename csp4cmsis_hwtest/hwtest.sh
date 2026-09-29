@@ -32,7 +32,7 @@ die() { echo "hwtest: $*" >&2; exit 1; }
 [[ $# -ge 4 ]] || die "usage: $0 build|flash|capture|collect|run v1|v2 <build type> AC6|GCC"
 CMD="$1"; LIB="$2"; BT="$3"; TC="$4"
 case "$LIB" in v1) LIBDIR="$LIB_V1" ;; v2) LIBDIR="$LIB_V2" ;; *) die "lib must be v1 or v2" ;; esac
-case "$BT" in RTX5|FreeRTOS|RTX5-NoHeap|FreeRTOS-NoHeap|RTX5-HwCheck|RTX5-Soak) ;; *) die "unknown build type $BT" ;; esac
+case "$BT" in RTX5|FreeRTOS|RTX5-NoHeap|FreeRTOS-NoHeap|RTX5-HwCheck|RTX5-Soak|RTX5-HwCheck-O2|RTX5-O2|RTX5-Os|FreeRTOS-O2|FreeRTOS-Os) ;; *) die "unknown build type $BT" ;; esac
 case "$TC" in AC6|GCC) ;; *) die "toolchain must be AC6 or GCC" ;; esac
 
 OUTDIR="$HERE/out/DevKit-E8/$BT/$TC"

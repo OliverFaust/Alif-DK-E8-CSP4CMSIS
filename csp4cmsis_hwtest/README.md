@@ -32,6 +32,14 @@ Hardware-only checks (RTX5):
   cycle-step sweep (0..31 NOPs per spin value; the ISR records the victim's preempted PC); with 2.0,
   `putFromISR()` cost and interrupt latency (DWT cycle match -> DebugMonitor -> probe interrupt).
 - `RTX5-Soak`: the suite, restarted with `NVIC_SystemReset()` after every SUMMARY.
+- `RTX5-HwCheck-O2`: the same checks at `-O2`. For the T16a sweep it adds a tick-driven monitor, a
+  DebugMonitor watchdog at priority 0 (DWT cycle match) and prints through `hwtest_raw_puts()`.
+
+Optimised suite builds: `RTX5-O2`, `RTX5-Os`, `FreeRTOS-O2`, `FreeRTOS-Os` (flag passed verbatim).
+
+Fault reports (`HardFault_Handler` in `bc_tests.cpp`) go through `hwtest_raw_puts()` in `main.cpp`,
+which polls the UART4 registers: `printf()` cannot be used there, because its stdio lock needs an RTOS
+mutex.
 
 ## Running
 

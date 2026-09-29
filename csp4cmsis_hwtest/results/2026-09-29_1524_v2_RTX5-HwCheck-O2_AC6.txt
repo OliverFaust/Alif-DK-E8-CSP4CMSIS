@@ -1,0 +1,50 @@
+# config: lib=v2 build type=RTX5-HwCheck-O2 toolchain=AC6
+# library: <CSP4CMSIS checkout> @ 73f46b7cf20a21764316885490d8d0ce6b07c556 dirty=0
+# harness: Alif-DK-E8-CSP4CMSIS @ e879866a59ef4646074f36e6f56d9aea370c1fcb
+# image: <repo>/csp4cmsis_hwtest/out/DevKit-E8/RTX5-HwCheck-O2/AC6/M55_HP.bin sha256=0732814e955e6873
+# console: last run in <console log> (minicom log), collected 2026-09-29T15:24:36+01:00
+=== HWTEST header ===
+board: Alif DevKit-E8, AE822FA0E5597LS0, core M55_HP; SystemCoreClock=400000000 Hz
+caches: I=on D=on
+library: v2 (v1.0.0-48-g73f46b7) commit 73f46b7cf20a21764316885490d8d0ce6b07c556
+build type: RTX5-HwCheck-O2; toolchain: AC6 (Arm Compiler Clang 20.0.0git)
+rtos: RTX V5.9.1 (api 20030000, kernel 50090001); tick 1000 Hz
+CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY=128 (__NVIC_PRIO_BITS=8); SWI IRQ 104 at priority 192
+sweep: search hi=400000u, range kb-1500u..kb+1000u
+
+=== CSP4CMSIS hardware-only checks ===
+backend: Keil RTX5 5.9.1; library: v2 API (ring buffer); RTOS heap enabled
+   [LAT] SystemCoreClock=400000000 Hz; SWI priority 192; threshold 128
+   [LAT] putFromISR 4 B, KeepNewest full (copy only)  n=256 min=43 avg=43 max=43 cycles
+   [LAT] putFromISR 4 B, Block, reader waiting        n=256 min=257 avg=258 max=508 cycles
+   [LAT] putFromISR 64 B, KeepNewest full (copy only) n=256 min=97 avg=97 max=97 cycles
+   [LAT] putFromISR 64 B, Block, reader waiting       n=256 min=312 avg=313 max=363 cycles
+   [LAT] putFromISR 1024 B, KeepNewest full (copy only) n=256 min=368 avg=368 max=368 cycles
+   [LAT] putFromISR 1024 B, Block, reader waiting     n=256 min=614 avg=615 max=667 cycles
+   [LAT] DWT: NUMCOMP=8 FUNCTION0 readback=0x58000011; DHCSR.C_DEBUGEN=0; DEMCR=0x01110000 (MON_EN=1 SDME=1)
+   [LAT] latency, plain copies 4 B, probe prio 64     n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 4 B, probe prio 64 n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+   [LAT] latency, plain copies 4 B, probe prio 160    n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 4 B, probe prio 160 n=256 min=35 avg=41 max=59 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+   [LAT] latency, plain copies 64 B, probe prio 64    n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 64 B, probe prio 64 n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+   [LAT] latency, plain copies 64 B, probe prio 160   n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 64 B, probe prio 160 n=256 min=35 avg=65 max=112 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+   [LAT] latency, plain copies 1024 B, probe prio 64  n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 1024 B, probe prio 64 n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+   [LAT] latency, plain copies 1024 B, probe prio 160 n=256 min=35 avg=35 max=35 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=16 cycles
+   [LAT] latency, putFromISR copies 1024 B, probe prio 160 n=256 min=35 avg=138 max=247 cycles
+   [LAT]   (trigger: DWT match -> DebugMonitor entry) n=256 min=16 avg=16 max=17 cycles
+RESULT LAT: PASS -- putFromISR() cost and interrupt latency measured (values above; judged in the report)
+SUMMARY: PASS=1 FAIL=0 SKIP=0 REPLACED=0

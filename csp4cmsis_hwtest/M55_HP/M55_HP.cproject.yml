@@ -59,21 +59,21 @@ project:
 
     # RTX5 build types
     - component: CMSIS:RTOS2:Keil RTX5&Source
-      for-context: [.RTX5, .RTX5-NoHeap, .RTX5-HwCheck, .RTX5-Soak]
+      for-context: [.RTX5, .RTX5-NoHeap, .RTX5-HwCheck, .RTX5-Soak, .RTX5-HwCheck-O2, .RTX5-O2, .RTX5-Os]
 
     # FreeRTOS build types: CMSIS-RTOS2 adapter over FreeRTOS 11.3.0
     - component: CMSIS:RTOS2:FreeRTOS&Cortex-M
-      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap, .FreeRTOS-O2, .FreeRTOS-Os]
     - component: RTOS&FreeRTOS:Core&Cortex-M
-      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap, .FreeRTOS-O2, .FreeRTOS-Os]
     - component: RTOS&FreeRTOS:Config&CMSIS RTOS2
-      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap, .FreeRTOS-O2, .FreeRTOS-Os]
     - component: RTOS&FreeRTOS:Heap&Heap_4          # not in NoHeap: heap_4.c needs dynamic allocation
-      for-context: [.FreeRTOS]
+      for-context: [.FreeRTOS, .FreeRTOS-O2, .FreeRTOS-Os]
     - component: RTOS&FreeRTOS:Timers
-      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap, .FreeRTOS-O2, .FreeRTOS-Os]
     - component: RTOS&FreeRTOS:Event Groups
-      for-context: [.FreeRTOS, .FreeRTOS-NoHeap]
+      for-context: [.FreeRTOS, .FreeRTOS-NoHeap, .FreeRTOS-O2, .FreeRTOS-Os]
 
   misc:
     - for-compiler: GCC

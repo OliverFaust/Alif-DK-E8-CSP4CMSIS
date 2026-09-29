@@ -1,0 +1,21 @@
+# config: lib=v1 build type=RTX5-HwCheck-O2 toolchain=AC6 (T16a-fine at -O2, with tick monitor + DebugMonitor watchdog at priority 0)
+# library: <CSP4CMSIS v1.0.0 worktree> @ a789d2aad4ab3469304d9c1beedff7d85466005b dirty=0
+# console: last run in ~/hwtest_console.log. No output after the k=39663 line (15:02:21), still silent at 15:07: neither the monitor thread nor the priority-0 DebugMonitor watchdog printed.
+=== HWTEST header ===
+board: Alif DevKit-E8, AE822FA0E5597LS0, core M55_HP; SystemCoreClock=400000000 Hz
+caches: I=on D=on
+library: v1 (v1.0.0) commit a789d2aad4ab3469304d9c1beedff7d85466005b
+build type: RTX5-HwCheck-O2; toolchain: AC6 (Arm Compiler Clang 20.0.0git)
+rtos: RTX V5.9.1 (api 20030000, kernel 50090001); tick 1000 Hz
+CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY=128 (__NVIC_PRIO_BITS=8); SWI IRQ 104 at priority 192
+sweep: search hi=400000u, range kb-1500u..kb+1000u
+
+=== CSP4CMSIS hardware-only checks ===
+backend: Keil RTX5 5.9.1; library: v1 API (osMessageQueue); RTOS heap enabled
+   [T16a-fine] registerWaitingTask @0x00003954; kb=39913; k=38413..40913 x pad 0..31 NOPs
+   [T16a-fine] k=38413: EARLY=32 LATE=0 BUG=0, preempted inside registerWaitingTask=0
+   [T16a-fine] k=38663: EARLY=8032 LATE=0 BUG=0, preempted inside registerWaitingTask=0
+   [T16a-fine] k=38913: EARLY=16032 LATE=0 BUG=0, preempted inside registerWaitingTask=0
+   [T16a-fine] k=39163: EARLY=24032 LATE=0 BUG=0, preempted inside registerWaitingTask=0
+   [T16a-fine] k=39413: EARLY=32032 LATE=0 BUG=0, preempted inside registerWaitingTask=0
+   [T16a-fine] k=39663: EARLY=40032 LATE=0 BUG=0, preempted inside registerWaitingTask=0

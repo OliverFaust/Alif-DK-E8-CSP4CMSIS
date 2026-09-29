@@ -91,6 +91,79 @@ void fine_victim_main(void* arg) {
 constexpr uint32_t HWT_POOL = 8;
 csp::Channel<uint32_t> hwt_pool[HWT_POOL];
 uint32_t hwt_next = 0;
+// Monitor: if no trial completes for 2 s, print where the runner and the victim
+// are (saved PC, thread state) and the last trial's parameters, once.
+volatile uint32_t g_trials = 0, g_last_k = 0, g_last_pad = 0;
+ThreadSlot mon_slot;
+} // namespace
+extern "C" int stdout_putchar(int ch);    // retarget layer: raw UART, no stdio lock
+namespace {
+void raw_print(const char* s) { while (*s) stdout_putchar(*s++); }
+void t16af_monitor(void*) {
+    static char buf[256];
+    uint32_t seen = g_trials;
+    for (;;) {
+        osDelay(2000);
+        if (g_trials != seen) { seen = g_trials; continue; }
+        snprintf(buf, sizeof buf, "   [T16a-fine] MONITOR: no trial completed for 2 s. last k=%lu pad=%lu, trials=%lu, stage=%lu, "
+               "isr_ok=%d isr_done=%d got=0x%08lx val=0x%08lx last victim PC in ISR=0x%08lx\r\n",
+               (unsigned long)g_last_k, (unsigned long)g_last_pad, (unsigned long)g_trials, (unsigned long)g_stage,
+               (int)t16a_isr_ok, (int)t16a_isr_done, (unsigned long)t16a_got, (unsigned long)t16a_val, (unsigned long)g_vpc);
+        raw_print(buf);
+        snprintf(buf, sizeof buf, "   [T16a-fine] MONITOR: runner state=%d saved PC=0x%08lx; victim state=%d saved PC=0x%08lx\r\n",
+               (int)osThreadGetState(t16a.runner), (unsigned long)saved_pc(t16a.runner),
+               (int)osThreadGetState(t16a.victim), (unsigned long)saved_pc(t16a.victim));
+        raw_print(buf);
+        raw_print("SUMMARY: aborted (T16a-fine hang, see MONITOR lines)\r\n\x04");
+        park();
+    }
+}
+// Watchdog that works even when the RTOS tick is blocked: a DWT cycle-count
+// match raises DebugMonitor at priority 0 (not masked by BASEPRI) every
+// WD_PERIOD cycles. After 16 periods (~2 s) without a completed trial it prints
+// the interrupted context straight to the UART4 registers (polled) and stops.
+constexpr uint32_t WD_PERIOD = 50000000u;     // 125 ms at 400 MHz
+volatile uint32_t wd_seen = 0, wd_idle = 0;
+void wd_arm() { DWT->COMP0 = DWT->CYCCNT + WD_PERIOD;
+                DWT->FUNCTION0 = (1u << DWT_FUNCTION_ACTION_Pos) | (1u << DWT_FUNCTION_MATCH_Pos); }
+} // namespace
+extern "C" void hwtest_raw_puts(const char* s);   // main.cpp: polled UART4
+namespace { void uart4_puts(const char* s) { hwtest_raw_puts(s); } }
+extern "C" void wd_handler(const uint32_t* frame, uint32_t exc_return) {
+    (void)DWT->FUNCTION0;
+    if (g_trials != wd_seen) { wd_seen = g_trials; wd_idle = 0; wd_arm(); return; }
+    if (++wd_idle < 16u) { wd_arm(); return; }
+    DWT->FUNCTION0 = 0;
+    static char b[320];
+    snprintf(b, sizeof b, "\r\n   [T16a-fine] WATCHDOG: no trial completed for ~2 s. Interrupted context: PC=0x%08lx LR=0x%08lx "
+             "xPSR=0x%08lx (exception %lu) EXC_RETURN=0x%08lx BASEPRI=0x%02lx PRIMASK=%lu\r\n",
+             (unsigned long)frame[6], (unsigned long)frame[5], (unsigned long)frame[7], (unsigned long)(frame[7] & 0x1FFu),
+             (unsigned long)exc_return, (unsigned long)__get_BASEPRI(), (unsigned long)__get_PRIMASK());
+    uart4_puts(b);
+    snprintf(b, sizeof b, "   [T16a-fine] WATCHDOG: last k=%lu pad=%lu trials=%lu stage=%lu isr_ok=%d isr_done=%d "
+             "victim PC at last ISR=0x%08lx; runner saved PC=0x%08lx; victim saved PC=0x%08lx\r\n"
+             "SUMMARY: aborted (T16a-fine hang, see WATCHDOG lines)\r\n",
+             (unsigned long)g_last_k, (unsigned long)g_last_pad, (unsigned long)g_trials, (unsigned long)g_stage,
+             (int)t16a_isr_ok, (int)t16a_isr_done, (unsigned long)g_vpc,
+             (unsigned long)saved_pc(t16a.runner), (unsigned long)saved_pc(t16a.victim));
+    uart4_puts(b);
+    for (;;) { }
+}
+extern "C" __attribute__((naked)) void DebugMon_Handler(void) {
+    __asm volatile(
+        "tst lr, #4       \n"
+        "ite eq           \n"
+        "mrseq r0, msp    \n"
+        "mrsne r0, psp    \n"
+        "mov r1, lr       \n"
+        "b wd_handler     \n");
+}
+namespace {
+void wd_start() {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_MON_EN_Msk | CoreDebug_DEMCR_TRCENA_Msk;
+    NVIC_SetPriority(DebugMonitor_IRQn, 0);
+    wd_seen = g_trials; wd_idle = 0; wd_arm();
+}
 void t16af_victim() { In in = t16a_ch->reader(); uint32_t v = T15_SENT; in >> v; t16a_got = v; }
 void t16af_isr() { g_vpc = saved_pc(t16a.victim); t16a_isr(); }
 void t16af_aggr() {
@@ -102,6 +175,8 @@ void test_T16a_fine() {
     t16a_ch = &hwt_pool[hwt_next++]; g_current_test = "T16a-fine";
     t16a = {"T16a-fine", t16a_reset, t16a_probe, t16af_victim, t16af_aggr, nullptr, nullptr, t16a_check, nullptr, osThreadGetId()};
     t16a.victim = spawn(fine_victim_main, &t16a, osPriorityLow, t16a_s, "T16af");
+    spawn(t16af_monitor, nullptr, osPriorityRealtime, mon_slot, "T16amon");
+    wd_start();
     const uint32_t f0 = reinterpret_cast<uint32_t>(&_ZN3csp8internal15AltChanSyncBase19registerWaitingTaskEPvb) & ~1u;
 
     uint32_t lo = 0, hi = BC_SEARCH_HI; g_pad = 0;
@@ -112,8 +187,9 @@ void test_T16a_fine() {
     uint32_t n[4] = {0, 0, 0, 0}, inside = 0;
     for (uint32_t k = k0; k <= k1; ++k) {
         for (uint32_t p = 0; p < HWT_PADS; ++p) {
-            g_pad = p; g_vpc = 0;
+            g_pad = p; g_vpc = 0; g_last_k = k; g_last_pad = p;
             Outcome o = trial(t16a, k);
+            g_trials = g_trials + 1;
             n[o]++;
             uint32_t off = g_vpc - f0;
             if (off < HWT_SPAN) { inside++; hwt_hits[off / 2]++; if (o == BUG) hwt_bugs[off / 2]++; }

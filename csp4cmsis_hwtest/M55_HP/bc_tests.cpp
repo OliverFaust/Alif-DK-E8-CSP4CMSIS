@@ -1164,11 +1164,28 @@ void runner(void*) {
 
 // A fault (e.g. T16a's copy through a null pointer) ends the run with a report
 // instead of hanging in the startup file's default handler.
-extern "C" void HardFault_Handler(void) {
-    printf("!! HardFault during %s: CFSR=0x%08lx HFSR=0x%08lx BFAR=0x%08lx MMFAR=0x%08lx\r\n", g_current_test,
-           (unsigned long)SCB->CFSR, (unsigned long)SCB->HFSR, (unsigned long)SCB->BFAR, (unsigned long)SCB->MMFAR);
-    printf("SUMMARY: aborted by HardFault\r\n\x04");
+// DK-E8: report through hwtest_raw_puts() (main.cpp: polled UART4 registers),
+// not printf(), whose stdio lock needs an RTOS mutex that handler mode cannot
+// take; also report the stacked PC/LR/xPSR of the faulting context.
+extern "C" void hwtest_raw_puts(const char* s);
+extern "C" void bc_hardfault(const uint32_t* frame, uint32_t exc_return) {
+    static char b[300];
+    snprintf(b, sizeof b, "\r\n!! HardFault during %s: CFSR=0x%08lx HFSR=0x%08lx BFAR=0x%08lx MMFAR=0x%08lx\r\n"
+             "!! stacked PC=0x%08lx LR=0x%08lx xPSR=0x%08lx EXC_RETURN=0x%08lx\r\nSUMMARY: aborted by HardFault\r\n\x04",
+             g_current_test, (unsigned long)SCB->CFSR, (unsigned long)SCB->HFSR, (unsigned long)SCB->BFAR,
+             (unsigned long)SCB->MMFAR, (unsigned long)frame[6], (unsigned long)frame[5], (unsigned long)frame[7],
+             (unsigned long)exc_return);
+    hwtest_raw_puts(b);
     for (;;) { }
+}
+extern "C" __attribute__((naked)) void HardFault_Handler(void) {
+    __asm volatile(
+        "tst lr, #4       \n"
+        "ite eq           \n"
+        "mrseq r0, msp    \n"
+        "mrsne r0, psp    \n"
+        "mov r1, lr       \n"
+        "b bc_hardfault   \n");
 }
 
 #if defined(HWTEST_CHECKS)
