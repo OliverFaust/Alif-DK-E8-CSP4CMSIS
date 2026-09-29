@@ -1,3 +1,5 @@
+> **Frozen hardware test evidence for CSP4CMSIS 2.0** (library commit `c60665d`, before the 2.0.0 release; the `-O2`/`-Os` runs at `73f46b7`, same library sources). Not an example: the examples, on the released 2.0.0 pack, are on [main](https://github.com/OliverFaust/Alif-DK-E8-CSP4CMSIS/tree/main).
+
 # csp4cmsis_hwtest: CSP4CMSIS regression suite on the DK-E8
 
 Stage 1 of the CSP4CMSIS 2.0 hardware test plan (`docs/hardware_test_plan.md` in the CSP4CMSIS
