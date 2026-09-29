@@ -1,0 +1,164 @@
+# project: neuropathway, build type Release, GCC 14.2.1, CMSIS-Toolbox 2.14.0 (Alif SDK), CSP4CMSIS 1.0.0 (pack)
+# repo: Alif-DK-E8-CSP4CMSIS @ 19cb50d (branch csp4cmsis-2.0-migration)
+# image: neuropathway/out/M55_HP/DevKit-E8/Release/M55_HP.bin sha256=e6e14fd0d4d97dae; flashed with SETOOLS, config app-cfg-neuropathway.json(SETOOLS)
+# board: Alif DevKit-E8 AE822FA0E5597LS0 rev A1; console captured with minicom, 2026-09-29
+?[Sensor  sig w=  37 buf=1] acc_x[0]=-1.184202 acc_x[127]=-1.172735 sum=-3.600785
+[Infer   sig w=  37 buf=1] acc_x[0]=-1.184202 acc_x[127]=-1.172735 sum=-3.600785
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   37] logits = [-9.086753, 11.812778] -> LAYING
+[Sensor  sig w=  38 buf=0] acc_x[0]=-1.172980 acc_x[127]=-1.073034 sum=-3.435004
+[Infer   sig w=  38 buf=0] acc_x[0]=-1.172980 acc_x[127]=-1.073034 sum=-3.435004
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   38] logits = [-9.086753, 11.711815] -> LAYINGm,Board init: stdout OK, calling NpuInit()...
+Board init: NPU/SRAM0 clocks enabled, calling ethosu_init()...
+Board init: completed
+
+=== BUILD MARKER: neuropathway-pingpong-0001 ===
+
+neuropathway: Sensor -> Inference -> Console (RTSS-HP, DK-E8) starting
+*** MainApp_Task: Run() returned, entering report loop ***
+Senerence: model ready (method_allocation_pool[SRAM0]=32768 bySensor: IMU initialized and powered up, streaming continuously (decimate 16x -> convert -> normalize -> window, 2 ping-pong buffers)
+[Sensor  sig w=   0 buf=0] acc_x[0]=-1.173593 acc_x[127]=-1.173900 sum=-3.372206
+[Infer   sig w=   0 buf=0] acc_x[0]=-1.173593 acc_x[127]=-1.173900 sum=-3.372206
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    0] logits = [-9.086753, 11.711815] -> LAYING
+[Sensor  sig w=   1 buf=1] acc_x[0]=-1.175495 acc_x[127]=-1.176782 sum=-3.311180
+[Infer   sig w=   1 buf=1] acc_x[0]=-1.175495 acc_x[127]=-1.176782 sum=-3.311180
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    1] logits = [-9.086753, 11.711815] -> LAYING
+[Sensor  sig w=   2 buf=0] acc_x[0]=-1.174084 acc_x[127]=-1.171447 sum=-3.299881
+[Infer   sig w=   2 buf=0] acc_x[0]=-1.174084 acc_x[127]=-1.171447 sum=-3.299881
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    2] logits = [-9.086753, 11.812778] -> LAYING
+CSP_Main: 3752 bytes unused headroom (938 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=   3 buf=1] acc_x[0]=-1.171264 acc_x[127]=-1.857345 sum=-166.191116
+[Infer   sig w=   3 buf=1] acc_x[0]=-1.171264 acc_x[127]=-1.857345 sum=-166.191116
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    3] logits = [-11.711815, 13.529165] -> LAYING
+[Sensor  sig w=   4 buf=0] acc_x[0]=-1.614467 acc_x[127]=-0.606101 sum=-337.886536
+[Infer   sig w=   4 buf=0] acc_x[0]=-1.614467 acc_x[127]=-0.606101 sum=-337.886536
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    4] logits = [-10.500248, 13.125310] -> LAYING
+[Sensor  sig w=   5 buf=1] acc_x[0]=1.826548 acc_x[127]=-3.110982 sum=-275.686707
+[Infer   sig w=   5 buf=1] acc_x[0]=1.826548 acc_x[127]=-3.110982 sum=-275.686707
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    5] logits = [-11.711815, 13.529165] -> LAYING
+[Sensor  sig w=   6 buf=0] acc_x[0]=-6.315742 acc_x[127]=0.929841 sum=-439.100922
+[Infer   sig w=   6 buf=0] acc_x[0]=-6.315742 acc_x[127]=0.929841 sum=-439.100922
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    6] logits = [-7.370366, 8.682898] -> LAYING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=   7 buf=1] acc_x[0]=5.971551 acc_x[127]=-2.200049 sum=-195.074356
+[Infer   sig w=   7 buf=1] acc_x[0]=5.971551 acc_x[127]=-2.200049 sum=-195.074356
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    7] logits = [-10.399283, 13.125310] -> LAYING
+[Sensor  sig w=   8 buf=0] acc_x[0]=-2.542201 acc_x[127]=-2.655822 sum=-462.238464
+[Infer   sig w=   8 buf=0] acc_x[0]=-2.542201 acc_x[127]=-2.655822 sum=-462.238464
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    8] logits = [-11.711815, 13.529165] -> LAYING
+[Sensor  sig w=   9 buf=1] acc_x[0]=-2.774287 acc_x[127]=-0.740448 sum=-406.734039
+[Infer   sig w=   9 buf=1] acc_x[0]=-2.774287 acc_x[127]=-0.740448 sum=-406.734039
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window    9] logits = [-7.875186, 9.793500] -> LAYING
+[Sensor  sig w=  10 buf=0] acc_x[0]=-1.231355 acc_x[127]=-0.851311 sum=-12.563691
+[Infer   sig w=  10 buf=0] acc_x[0]=-1.231355 acc_x[127]=-0.851311 sum=-12.563691
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   10] logits = [-8.178078, 10.096392] -> LAYING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=  11 buf=1] acc_x[0]=-0.795083 acc_x[127]=1.670066 sum=-338.006744
+[Infer   sig w=  11 buf=1] acc_x[0]=-0.795083 acc_x[127]=1.670066 sum=-338.006744
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   11] logits = [-11.206995, 13.529165] -> LAYING
+[Sensor  sig w=  12 buf=0] acc_x[0]=-0.103789 acc_x[127]=-0.363346 sum=269.531128
+[Infer   sig w=  12 buf=0] acc_x[0]=-0.103789 acc_x[127]=-0.363346 sum=269.531128
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   12] logits = [-7.168438, 8.682898] -> LAYING
+[Sensor  sig w=  13 buf=1] acc_x[0]=0.005847 acc_x[127]=-3.243735 sum=-136.724945
+[Infer   sig w=  13 buf=1] acc_x[0]=0.005847 acc_x[127]=-3.243735 sum=-136.724945
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   13] logits = [-11.711815, 13.529165] -> LAYING
+[Sensor  sig w=  14 buf=0] acc_x[0]=-3.043962 acc_x[127]=-1.798849 sum=-366.059357
+[Infer   sig w=  14 buf=0] acc_x[0]=-3.043962 acc_x[127]=-1.798849 sum=-366.059357
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   14] logits = [-10.399283, 13.529165] -> LAYING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=  15 buf=1] acc_x[0]=-1.733729 acc_x[127]=-0.983695 sum=-112.565857
+[Infer   sig w=  15 buf=1] acc_x[0]=-1.733729 acc_x[127]=-0.983695 sum=-112.565857
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   15] logits = [-10.298320, 13.327237] -> LAYING
+[Sensor  sig w=  16 buf=0] acc_x[0]=-1.057213 acc_x[127]=-1.223567 sum=-21.915695
+[Infer   sig w=  16 buf=0] acc_x[0]=-1.057213 acc_x[127]=-1.223567 sum=-21.915695
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   16] logits = [-10.702175, 13.529165] -> LAYING
+[Sensor  sig w=  17 buf=1] acc_x[0]=-1.722018 acc_x[127]=-1.376248 sum=17.026875
+[Infer   sig w=  17 buf=1] acc_x[0]=-1.722018 acc_x[127]=-1.376248 sum=17.026875
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   17] logits = [-11.206995, 13.529165] -> LAYING
+[Sensor  sig w=  18 buf=0] acc_x[0]=-1.402002 acc_x[127]=-1.246685 sum=44.056107
+[Infer   sig w=  18 buf=0] acc_x[0]=-1.402002 acc_x[127]=-1.246685 sum=44.056107
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   18] logits = [-9.086753, 11.812778] -> LAYING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=  19 buf=1] acc_x[0]=-1.036427 acc_x[127]=0.601117 sum=48.429134
+[Infer   sig w=  19 buf=1] acc_x[0]=-1.036427 acc_x[127]=0.601117 sum=48.429134
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   19] logits = [0.000000, -2.221206] -> WALKING
+[Sensor  sig w=  20 buf=0] acc_x[0]=3.992712 acc_x[127]=1.487401 sum=224.929077
+[Infer   sig w=  20 buf=0] acc_x[0]=3.992712 acc_x[127]=1.487401 sum=224.929077
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   20] logits = [5.048196, -9.187716] -> WALKING
+[Sensor  sig w=  21 buf=1] acc_x[0]=1.773386 acc_x[127]=1.578335 sum=128.470444
+[Infer   sig w=  21 buf=1] acc_x[0]=1.773386 acc_x[127]=1.578335 sum=128.470444
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   21] logits = [3.634701, -7.067474] -> WALKING
+[Sensor  sig w=  22 buf=0] acc_x[0]=-2.417788 acc_x[127]=3.569744 sum=26.984798
+[Infer   sig w=  22 buf=0] acc_x[0]=-2.417788 acc_x[127]=3.569744 sum=26.984798
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   22] logits = [3.533737, -7.168438] -> WALKING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=  23 buf=1] acc_x[0]=1.649892 acc_x[127]=0.430839 sum=171.339264
+[Infer   sig w=  23 buf=1] acc_x[0]=1.649892 acc_x[127]=0.430839 sum=171.339264
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   23] logits = [6.360727, -11.408923] -> WALKING
+[Sensor  sig w=  24 buf=0] acc_x[0]=0.082984 acc_x[127]=-0.234150 sum=79.117470
+[Infer   sig w=  24 buf=0] acc_x[0]=0.082984 acc_x[127]=-0.234150 sum=79.117470
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   24] logits = [-3.836629, 4.543376] -> LAYING
+[Sensor  sig w=  25 buf=1] acc_x[0]=-0.273639 acc_x[127]=0.792919 sum=61.185707
+[Infer   sig w=  25 buf=1] acc_x[0]=-0.273639 acc_x[127]=0.792919 sum=61.185707
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   25] logits = [0.605784, -2.120242] -> WALKING
+[Sensor  sig w=  26 buf=0] acc_x[0]=0.802361 acc_x[127]=-1.303219 sum=17.020586
+[Infer   sig w=  26 buf=0] acc_x[0]=0.802361 acc_x[127]=-1.303219 sum=17.020586
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   26] logits = [-5.653979, 6.663619] -> LAYING
+CSP_Main: 3584 bytes unused headroom (896 words HWM, of 1024 allocated)
+Sensor: 848/4096 bytes used (3248 bytes unused headroom, 812 words HWM)
+Inference: 2168/16384 bytes used (14216 bytes unused headroom, 3554 words HWM)
+Console: 600/4096 bytes used (3496 bytes unused headroom, 874 words HWM)
+[Sensor  sig w=  27 buf=1] acc_x[0]=-1.101056 acc_x[127]=-1.162434 sum=3.942904
+[Infer   sig w=  27 buf=1] acc_x[0]=-1.101056 acc_x[127]=-1.162434 sum=3.942904
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   27] logits = [-9.288681, 12.014707] -> LAYING
+[Sensor  sig w=  28 buf=0] acc_x[0]=-1.162986 acc_x[127]=-1.161024 sum=6.401996
+[Infer   sig w=  28 buf=0] acc_x[0]=-1.162986 acc_x[127]=-1.161024 sum=6.401996
+[executorch:E EthosUBackend.cpp:351 execute()] Output 0: tensor_bytes=zu io_bytes=zu tensor_count=2 io_count=2 elem_size=2 shape=[2,1,1,1,1,1] tensor_dim=1 offset=2
+[window   28] logits = [-9.288681, 12.014707] -> LAYING

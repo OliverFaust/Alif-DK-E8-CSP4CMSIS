@@ -3,7 +3,7 @@ project:
   device: :M55_HP
 
   packs:
-    - pack: OliverFaust::CSP4CMSIS@1.0.0
+    - pack: OliverFaust::CSP4CMSIS@2.0.0
 
   define:
     - LIB_CSP4CMSIS

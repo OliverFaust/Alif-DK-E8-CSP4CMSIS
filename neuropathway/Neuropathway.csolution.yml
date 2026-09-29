@@ -41,7 +41,7 @@ solution:
     # M55_HP.cproject.yml) instead of raw csp4cmsis/src/*.cpp compiled
     # directly -- GitHub-hosted, resolved via cpackget from
     # https://github.com/OliverFaust/CSP4CMSIS/releases.
-    - pack: OliverFaust::CSP4CMSIS@^1.0.0
+    - pack: OliverFaust::CSP4CMSIS@2.0.0
 
     - pack: PyTorch::ExecuTorch
       path: ../tools/modelnova/packs/PyTorch.ExecuTorch.1.1.0-rc1-build.12

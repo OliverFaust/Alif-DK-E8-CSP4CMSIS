@@ -57,22 +57,15 @@ affiliates.
 - `neuropathway/M55_HP/model/`: `BufAttributes.hpp`, `ethosu_mem_config.h`
 
 
-- **Derived, original notice not present:** `neuropathway/M55_HP/device/BoardInit.cpp` is adapted
-  (through the local `object_detection_e8` project) from `device/alif-ensemble/src/BoardInit.cpp` in
-  [Arm-Examples/mlek-cmsis-pack-examples](https://github.com/Arm-Examples/mlek-cmsis-pack-examples),
-  Copyright Arm Limited and/or its affiliates, Apache-2.0. The copy here has no licence header; this
-  entry records its origin and licence.
+- `neuropathway/M55_HP/device/BoardInit.cpp`: adapted (through the local `object_detection_e8` project)
+  from `device/alif-ensemble/src/BoardInit.cpp` in
+  [Arm-Examples/mlek-cmsis-pack-examples](https://github.com/Arm-Examples/mlek-cmsis-pack-examples) at
+  commit `7b158c2`. Its Arm notice, missing from earlier versions of this copy, has been restored
+  verbatim from that commit.
 
 RTX_Config and FreeRTOSConfig come from the ARM::CMSIS-RTX and ARM::CMSIS-FreeRTOS packs;
 `BoardInit.hpp`, `BufAttributes.hpp` and `ethosu_mem_config.h` from Arm's ML embedded evaluation kit
 examples.
-
-## Build output
-
-`csp4cmsis_alt_test/tmp/` is tracked build output of CMSIS-Toolbox/CMake. Among other files, it holds
-61 object files (`*.obj`) compiled from the Alif, Arm and CSP4CMSIS sources of that project, i.e. binary
-forms of the files above and of the packs they come from, under the same licences. It is not needed to
-build and is due to be removed from the repository.
 
 ## Not third-party code
 

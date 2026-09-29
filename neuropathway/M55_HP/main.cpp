@@ -16,6 +16,7 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
+#include "cmsis_os2.h"
 #include "Driver_USART.h" /* For ARM_DRIVER_OK. */
 #if defined(RTE_CMSIS_Compiler_STDOUT)
 #include "retarget_init.h"
@@ -98,12 +99,20 @@ int main(void)
     printf("\r\nneuropathway: Sensor -> Inference -> Console (RTSS-HP, DK-E8) "
            "starting\r\n");
 
+    /* CMSIS-RTOS2 kernel start, as in csp4cmsis_alt_test/pack_test: the
+     * kernel is initialised before RunProcessingChainTest() creates the CSP
+     * main thread (osThreadNew), and started through the CMSIS-RTOS2 API
+     * (the FreeRTOS adapter's osKernelStart() calls vTaskStartScheduler()). */
+    osKernelInitialize();
+
     RunProcessingChainTest();
 
-    vTaskStartScheduler();
+    if (osKernelGetState() == osKernelReady) {
+        osKernelStart();
+    }
 
-    /* Only reached if the scheduler could not start. */
-    printf("ERROR: vTaskStartScheduler() returned -- scheduler did not start!\r\n");
+    /* Only reached if the kernel could not start. */
+    printf("ERROR: osKernelStart() returned -- kernel did not start!\r\n");
     for (;;) {
     }
 }
