@@ -347,4 +347,8 @@ before and are a harmless UART artefact.
   Apache License 2.0 (texts in [`LICENSES/`](LICENSES/)). Every file keeps its original header.
 - **The Alif files may only be used with and executed on Alif Semiconductor devices.**
 
+## Declaration
+
+Development of this project utilizes AI coding assistants for boilerplate generation, unit test creation, and architectural drafting. All core logic is manually reviewed and verified.
+
 Not affiliated with or endorsed by Alif Semiconductor.
