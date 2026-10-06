@@ -16,15 +16,27 @@
 // Timing: the FVP tick runs at ~312.5 Hz on both backends; only tick counts
 // are used. See README.md for the method and BUFFERED_CHANNEL_ANALYSIS.md.
 //
-// DK-E8 port (Alif-DK-E8-CSP4CMSIS, csp4cmsis_hwtest/): copied from
-// CSP4CMSIS tests/fvp_sse300/bc_tests.cpp @ dff8277. The only changes are the
-// BC_* platform macros below; their defaults are the FVP values, so this file
-// still builds for the FVP unchanged.
+// Other targets (MPS2 Cortex-M4 FVP, Alif DK-E8) set the BC_* platform macros
+// below; their defaults are the Corstone-300 FVP values.
 // =============================================================================
 #include "csp/csp4cmsis.h"
 #include "cmsis_os2.h"
+// Device header and backend: pack builds get them from RTE_Components.h;
+// builds without packs (STM32CubeIDE) from CSP4CMSIS_DEVICE_HEADER and the
+// CSP4CMSIS_RTOS2_BACKEND_* define, as the library itself does.
+#if __has_include("RTE_Components.h")
 #include "RTE_Components.h"
+#endif
+#if defined(CMSIS_device_header)
 #include CMSIS_device_header
+#else
+#include CSP4CMSIS_DEVICE_HEADER
+#endif
+#if defined(RTE_CMSIS_RTOS2_FreeRTOS) || (!defined(RTE_CMSIS_RTOS2_RTX5) && defined(CSP4CMSIS_RTOS2_BACKEND_FREERTOS))
+#define BC_FREERTOS 1
+#elif defined(RTE_CMSIS_RTOS2_RTX5) || defined(CSP4CMSIS_RTOS2_BACKEND_RTX5)
+#define BC_RTX5 1
+#endif
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
@@ -32,14 +44,15 @@
 // ---- platform parameters (defaults: Corstone-300 FVP) ------------------------
 // Software-interrupt source for the ISR-side operations (T2, T3i, T15i, T16s,
 // T16a). The handler is linked into the vector table at build time, so this
-// also works where the vector table is in read-only memory (DK-E8: MRAM).
+// also works where the vector table is in read-only memory.
 #ifndef BC_SWI_IRQn
 #define BC_SWI_IRQn     I2S_IRQn
 #define BC_SWI_HANDLER  I2S_Handler
 #endif
 // NVIC priority of that interrupt, as passed to NVIC_SetPriority(). Must be
 // numerically >= CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY (masked by CSP
-// critical sections). FVP: 6 of 0..7 (3 bits); DK-E8: 192 of 0..255 (8 bits).
+// critical sections). Corstone-300 and MPS2 Cortex-M4: 6 of 0..7 (3 bits);
+// DK-E8: 192 of 0..255 (8 bits).
 #ifndef BC_SWI_PRIO
 #define BC_SWI_PRIO     6
 #endif
@@ -55,9 +68,13 @@
 #define BC_SWEEP_ABOVE  1000u
 #endif
 
-#if defined(RTE_CMSIS_RTOS2_FreeRTOS)
+#if defined(BC_FREERTOS)
   #include "FreeRTOS.h"
+  #ifdef BC_BACKEND_NAME
+  #define BACKEND_NAME BC_BACKEND_NAME
+  #else
   #define BACKEND_NAME "FreeRTOS 11.3.0 (CMSIS-RTOS2 adapter)"
+  #endif
   #if (configSUPPORT_DYNAMIC_ALLOCATION == 0)
     // Heap-free build: no dynamic-allocation API exists; not touching the
     // heap keeps heap_4 (pvPortMalloc) out of the linked image.
@@ -67,7 +84,7 @@
     #define HEAP_MODE "RTOS heap enabled"
     static uint32_t heap_used() { return (uint32_t)(configTOTAL_HEAP_SIZE - xPortGetFreeHeapSize()); }
   #endif
-#elif defined(RTE_CMSIS_RTOS2_RTX5)
+#elif defined(BC_RTX5)
   #include "rtx_os.h"
   #define BACKEND_NAME "Keil RTX5 5.9.1"
   // RTX5 dynamic memory pool: mem_head_t { uint32_t size; uint32_t used; } (rtx_memory.c).
@@ -86,9 +103,58 @@
 #endif
 
 // ---------------------------------------------------------------------------
-// Library-version shim
+// Library-version shim. 3.0 on: csp/csp_version.h (no feature macros). Before:
+// the feature macros of 2.x (undefined in 1.x).
 // ---------------------------------------------------------------------------
-#if defined(CSP4CMSIS_BUFFERED_CHANNEL_API) && (CSP4CMSIS_BUFFERED_CHANNEL_API >= 2)
+#if __has_include("csp/csp_version.h")
+  #define BC_LIB3          1
+  #define BC_ISR_WRITER    1
+  #define BC_OWRV          1
+  #define BC_BUFFERED_V2   1
+  #define BC_SLEEPFOR_TIME 1
+#else
+  #define BC_LIB3          0
+  #if defined(CSP4CMSIS_ISR_WRITER_API)
+    #define BC_ISR_WRITER  1
+  #else
+    #define BC_ISR_WRITER  0
+  #endif
+  #if defined(CSP4CMSIS_ALT_PROTOCOL_OWRV)
+    #define BC_OWRV        1
+  #else
+    #define BC_OWRV        0
+  #endif
+  #if defined(CSP4CMSIS_BUFFERED_CHANNEL_API) && (CSP4CMSIS_BUFFERED_CHANNEL_API >= 2)
+    #define BC_BUFFERED_V2 1
+  #else
+    #define BC_BUFFERED_V2 0
+  #endif
+  #if defined(CSP4CMSIS_SLEEPFOR_TIME_API)
+    #define BC_SLEEPFOR_TIME 1
+  #else
+    #define BC_SLEEPFOR_TIME 0
+  #endif
+#endif
+// ALT construction. 3.0: Alternative alt(in | v, timeout) (guard internals are
+// private). 1.x/2.x: Alternative alt({in.getGuard(v), timeout.internal_guard_ptr}).
+// Usage: csp::Alternative alt BC_ALTV(BC_G(in, v), BC_T(timeout));
+#if BC_LIB3
+  #define BC_ALTV(...)     (__VA_ARGS__)
+  #define BC_G(end, var)   (end) | (var)
+  #define BC_T(tg)         (tg)
+  #define BC_OUT_GUARD(out, var) csp::internal::Access::outputGuard(out, var)
+  using BC_SignalChannel = csp::SignalChannel;
+#else
+  #define BC_ALTV(...)     ({__VA_ARGS__})
+  #define BC_G(end, var)   (end).getGuard(var)
+  #define BC_T(tg)         (tg).internal_guard_ptr
+  #define BC_OUT_GUARD(out, var) (out).getGuard(var)
+#endif
+#if !BC_LIB3
+  using BC_SignalChannel = csp::SignalChannel<>;
+#endif
+
+#if BC_BUFFERED_V2
   #define LIB_V2 1
   #define LIB_NAME "v2 API (ring buffer)"
   template <typename T, size_t N, csp::BufferPolicy P>
@@ -149,6 +215,34 @@ WRAP(uint32_t,   osMessageQueueGetSpace, (osMessageQueueId_t q), (q))
 WRAP(osStatus_t, osMutexAcquire,         (osMutexId_t m, uint32_t t), (m, t))
 WRAP(osStatus_t, osMutexRelease,         (osMutexId_t m), (m))
 #undef WRAP
+// T6: RTOS timers created during the test (2.0.1: a timeout guard is none).
+static volatile uint32_t g_timer_news = 0;
+#if defined(__ARMCC_VERSION)
+osTimerId_t $Super$$osTimerNew(osTimerFunc_t f, osTimerType_t t, void* a, const osTimerAttr_t* at);
+osTimerId_t $Sub$$osTimerNew(osTimerFunc_t f, osTimerType_t t, void* a, const osTimerAttr_t* at) {
+    g_timer_news = g_timer_news + 1; return $Super$$osTimerNew(f, t, a, at);
+}
+#else
+osTimerId_t __real_osTimerNew(osTimerFunc_t f, osTimerType_t t, void* a, const osTimerAttr_t* at);
+osTimerId_t __wrap_osTimerNew(osTimerFunc_t f, osTimerType_t t, void* a, const osTimerAttr_t* at) {
+    g_timer_news = g_timer_news + 1; return __real_osTimerNew(f, t, a, at);
+}
+#endif
+// T28: make the next osThreadNew() call fail (returns NULL without creating a thread).
+static volatile uint32_t g_fail_next_thread_new = 0;
+#if defined(__ARMCC_VERSION)
+osThreadId_t $Super$$osThreadNew(osThreadFunc_t f, void* a, const osThreadAttr_t* at);
+osThreadId_t $Sub$$osThreadNew(osThreadFunc_t f, void* a, const osThreadAttr_t* at) {
+    if (g_fail_next_thread_new) { g_fail_next_thread_new = 0; return nullptr; }
+    return $Super$$osThreadNew(f, a, at);
+}
+#else
+osThreadId_t __real_osThreadNew(osThreadFunc_t f, void* a, const osThreadAttr_t* at);
+osThreadId_t __wrap_osThreadNew(osThreadFunc_t f, void* a, const osThreadAttr_t* at) {
+    if (g_fail_next_thread_new) { g_fail_next_thread_new = 0; return nullptr; }
+    return __real_osThreadNew(f, a, at);
+}
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -160,10 +254,15 @@ constexpr uint32_t F_START = 0x10000000u;   // runner -> victim (outside CSP4CMS
 constexpr uint32_t F_ACK   = 0x20000000u;   // victim -> runner
 constexpr uint32_t T_ACK   = 30u;           // ticks before a victim counts as hung
 
+// Test threads: static stacks; static control blocks unless the library is
+// built with dynamic allocation (3.0: CSP4CMSIS_DYNAMIC_ALLOCATION), where the
+// backend's control-block types are not declared.
 template <size_t WORDS>
 struct ThreadSlotN {
+#if defined(CSP4CMSIS_STATIC_ALLOCATION)
     alignas(8) uint32_t stack[WORDS];
     csp::internal::csp_static_thread_storage_t tcb;
+#endif
 };
 using ThreadSlot = ThreadSlotN<256>;      // 1 KB workers (T5 needs a 32 KB static channel in RAM)
 using RunnerSlot = ThreadSlotN<2048>;     // 8 KB runner
@@ -172,8 +271,13 @@ template <size_t WORDS>
 osThreadId_t spawn(osThreadFunc_t fn, void* arg, osPriority_t prio, ThreadSlotN<WORDS>& s, const char* name) {
     osThreadAttr_t a = {};
     a.name = name; a.priority = prio;
-    a.stack_mem = s.stack; a.stack_size = sizeof(s.stack);
+    a.stack_size = WORDS * sizeof(uint32_t);
+#if defined(CSP4CMSIS_STATIC_ALLOCATION)
+    a.stack_mem = s.stack;
     a.cb_mem = &s.tcb;     a.cb_size = sizeof(s.tcb);
+#else
+    (void)s;                 // dynamic: the RTOS allocates stack and control block together
+#endif
     return osThreadNew(fn, arg, &a);
 }
 
@@ -182,7 +286,7 @@ void park() { for (;;) osDelay(osWaitForever); }
 template <typename C> void drain(C& ch) { uint32_t x; while (ch.pending()) ch.input(&x); }
 // ISR write: 2.0 through the public ISR writer end (IsrChanout), 1.x through
 // the channel's own putFromISR().
-#if defined(CSP4CMSIS_ISR_WRITER_API)
+#if BC_ISR_WRITER
 template <typename C> bool isr_put(C* ch, uint32_t v) { csp::IsrChanout<uint32_t> w(ch); return w.putFromISR(v); }
 #else
 template <typename C> bool isr_put(C* ch, uint32_t v) { return ch->putFromISR(v); }
@@ -202,9 +306,9 @@ void result(const char* id, int verdict /*1 pass, 0 fail, -1 skip*/, const char*
 }
 
 // ---------------------------------------------------------------------------
-// Software interrupt BC_SWI_IRQn (FVP: I2S_IRQn, DK-E8: CANFD0_IRQ_IRQn; both
-// unused): the aggressor pends it and the handler runs the ISR-side operation
-// of the current test. Priority BC_SWI_PRIO is below
+// Software interrupt BC_SWI_IRQn (Corstone-300: I2S_IRQn, unused): the
+// aggressor pends it and the handler runs the ISR-side operation of the
+// current test. Priority BC_SWI_PRIO is below
 // CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY, i.e. masked by CSP critical
 // sections, as required for putFromISR().
 // ---------------------------------------------------------------------------
@@ -315,7 +419,7 @@ void test_T0() {
     static BlockChan<4> ch; t0_ch = &ch;
     spawn(t0_writer, nullptr, osPriorityNormal, t0_slot, "T0w");
     In in(&ch); uint32_t v = 0, sum = 0, n = 0;
-    csp::Alternative alt({in.getGuard(v)});
+    csp::Alternative alt BC_ALTV(BC_G(in, v));
     for (int i = 0; i < 10; ++i) { alt.priSelect(); sum += v; n++; }
     result("T0", (n == 10 && sum == 55) ? 1 : 0, "control: 10 values through a Block BufferedChannel via ALT");
 }
@@ -328,7 +432,7 @@ void t1a_reset() { drain(*t1a_ch); }
 bool t1a_probe() { return t1a_ch->pending(); }
 void t1a_victim() {
     static In in(t1a_ch); static uint32_t v;
-    static csp::Alternative alt({in.getGuard(v)});
+    static csp::Alternative alt BC_ALTV(BC_G(in, v));
     alt.priSelect();
     drain(*t1a_ch);
 }
@@ -347,7 +451,7 @@ void t1b_reset() { drain(*t1b_ch); uint32_t one = 1; t1b_ch->output(&one); }
 bool t1b_probe() { return t1b_ch->space_available(); }
 void t1b_victim() {
     static Out out(t1b_ch); static uint32_t w = 77;
-    static csp::Alternative alt({out.getGuard(w)});
+    static csp::Alternative alt BC_ALTV(BC_G(out, w));
     alt.priSelect();
 }
 void t1b_aggr()   { uint32_t x; t1b_ch->input(&x); }
@@ -370,28 +474,28 @@ BlockChan<1>* t2_b; NewestChan<1>* t2_n; csp::Channel<uint32_t>* t2_r;
 ThreadSlot t2_s1, t2_s2, t2_s3, t2_s4;
 volatile uint32_t t2_got = 0;
 void t2_alt_reader(void*) {            // ALT reader on the Block channel, 2 rounds
-    In in(t2_b); uint32_t v; csp::Alternative alt({in.getGuard(v)});
+    In in(t2_b); uint32_t v; csp::Alternative alt BC_ALTV(BC_G(in, v));
     for (int i = 0; i < 2; ++i) { alt.priSelect(); t2_got = t2_got + v; }
     park();
 }
 void t2_alt_writer(void*) {            // ALT writer on the (full) Block channel
-    Out out(t2_b); uint32_t w = 7; csp::Alternative alt({out.getGuard(w)});
+    Out out(t2_b); uint32_t w = 7; csp::Alternative alt BC_ALTV(BC_G(out, w));
     alt.priSelect(); park();
 }
 void t2_newest_reader(void*) {         // ALT reader on KeepNewest, 2 rounds
-    In in(t2_n); uint32_t v; csp::Alternative alt({in.getGuard(v)});
+    In in(t2_n); uint32_t v; csp::Alternative alt BC_ALTV(BC_G(in, v));
     for (int i = 0; i < 2; ++i) { alt.priSelect(); t2_got = t2_got + v; }
     park();
 }
 void t2_isr_buffered() { (void)isr_put(t2_b, 1000u); }
 void t2_isr_newest()   { (void)isr_put(t2_n, 2000u); }
-#if defined(CSP4CMSIS_ALT_PROTOCOL_OWRV)
-csp::SignalChannel<>* t2_sig; ThreadSlot t2_s5, t2_s6, t2_s7;
-void t2_rv_alt_reader(void*) { In in = t2_r->reader(); uint32_t v = 0; csp::Alternative alt({in.getGuard(v)}); alt.priSelect(); t2_got = t2_got + v; park(); }
-void t2_rv_alt_writer(void*) { Out out = t2_r->writer(); uint32_t w = 4000; csp::Alternative alt({out.getGuard(w)}); alt.priSelect(); park(); }
-void t2_sig_alt(void*) { csp::Chanin<csp::Signal> in = t2_sig->reader(); csp::Signal s; csp::Alternative alt({in.getGuard(s)}); alt.priSelect(); t2_got = t2_got + 1; park(); }
+#if BC_OWRV
+BC_SignalChannel* t2_sig; ThreadSlot t2_s5, t2_s6, t2_s7;
+void t2_rv_alt_reader(void*) { In in = t2_r->reader(); uint32_t v = 0; csp::Alternative alt BC_ALTV(BC_G(in, v)); alt.priSelect(); t2_got = t2_got + v; park(); }
+void t2_rv_alt_writer(void*) { Out out = t2_r->writer(); uint32_t w = 4000; csp::Alternative alt BC_ALTV(BC_G(out, w)); alt.priSelect(); park(); }
+void t2_sig_alt(void*) { csp::Chanin<csp::Signal> in = t2_sig->reader(); csp::Signal s; csp::Alternative alt BC_ALTV(BC_G(in, s)); alt.priSelect(); t2_got = t2_got + 1; park(); }
 #endif
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
 void t2_rv_reader(void*) { uint32_t v; csp::Chanin<uint32_t> in = t2_r->reader(); in >> v; t2_got = t2_got + v; park(); }
 void t2_isr_rv()       { uint32_t v = 3000; Out out = t2_r->writer(); out.putFromISR(v); }
 #endif
@@ -411,7 +515,7 @@ void test_T2() {
     spawn(t2_newest_reader, nullptr, osPriorityAboveNormal, t2_s3, "T2nr");
     osDelay(2); { uint32_t v = 10, w = 20; n.output(&v); n.output(&w); } osDelay(2);
     g_isr_op = t2_isr_newest; isr_fire(); osDelay(2);
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
     // (4) rendezvous putFromISR() to a blocked reader (1.x only: 2.0 has no ISR path into rendezvous)
     spawn(t2_rv_reader, nullptr, osPriorityAboveNormal, t2_s4, "T2rv"); osDelay(2);
     g_isr_op = t2_isr_rv; isr_fire(); osDelay(2);
@@ -419,13 +523,13 @@ void test_T2() {
     (void)t2_s4;
     // (4) 2.0 rendezvous and signal channels (task-only, OWRV): plain writer -> ALT reader,
     //     ALT writer -> plain reader, ALT writer vs ALT reader, signal to an ALT reader
-    static csp::SignalChannel<> sig; t2_sig = &sig;
+    static BC_SignalChannel sig; t2_sig = &sig;
     spawn(t2_rv_alt_reader, nullptr, osPriorityAboveNormal, t2_s5, "T2ra"); osDelay(2);
     { Out o = r.writer(); o << 3000u; } osDelay(2);
     spawn(t2_rv_alt_writer, nullptr, osPriorityAboveNormal, t2_s6, "T2wa"); osDelay(2);
     { In i = r.reader(); uint32_t x = 0; i >> x; t2_got = t2_got + x; } osDelay(2);
     spawn(t2_rv_alt_writer, nullptr, osPriorityAboveNormal, t2_s7, "T2wb"); osDelay(2);
-    { In i = r.reader(); uint32_t x = 0; csp::Alternative alt({i.getGuard(x)}); alt.priSelect(); t2_got = t2_got + x; } osDelay(2);
+    { In i = r.reader(); uint32_t x = 0; csp::Alternative alt BC_ALTV(BC_G(i, x)); alt.priSelect(); t2_got = t2_got + x; } osDelay(2);
     static ThreadSlot t2_s8; spawn(t2_sig_alt, nullptr, osPriorityAboveNormal, t2_s8, "T2sg"); osDelay(2);
     { csp::Chanout<csp::Signal> o = sig.writer(); o << csp::Signal{}; } osDelay(2);
 #endif
@@ -479,11 +583,11 @@ BlockChan<1>* t13_ch; ThreadSlot t13_vs, t13_as, t13b_vs, t13b_as; Case t13, t13
 osThreadId_t t13_aggr_tid; volatile bool t13_go = false, t13_livelock = false;
 uint32_t t13_livelocks = 0;
 void t13_reader_aggr(void*) {                     // high-priority ALT reader
-    In in(t13_ch); uint32_t v = 0; csp::Alternative alt({in.getGuard(v)});
+    In in(t13_ch); uint32_t v = 0; csp::Alternative alt BC_ALTV(BC_G(in, v));
     for (;;) { osThreadFlagsWait(F_GO, osFlagsWaitAny, osWaitForever); alt.priSelect(); osThreadFlagsSet(t13.runner, F_ACK2); }
 }
 void t13_writer_aggr(void*) {                     // high-priority ALT writer
-    Out out(t13_ch); uint32_t w = 9; csp::Alternative alt({out.getGuard(w)});
+    Out out(t13_ch); uint32_t w = 9; csp::Alternative alt BC_ALTV(BC_G(out, w));
     for (;;) { osThreadFlagsWait(F_GO, osFlagsWaitAny, osWaitForever); alt.priSelect(); osThreadFlagsSet(t13b.runner, F_ACK2); }
 }
 void t13_kick() {
@@ -528,8 +632,8 @@ void test_T13b() {
 //        re-target a blocked writer's ALT
 // ---------------------------------------------------------------------------
 BlockChan<1>* t4_ch; ThreadSlot t4_sa, t4_sb; volatile int t4_doneA = 0, t4_doneB = 0;
-void t4_writerA(void*) { Out out(t4_ch); uint32_t a = 10; csp::Alternative alt({out.getGuard(a)}); alt.priSelect(); t4_doneA = 1; park(); }
-void t4_writerB(void*) { osDelay(2); Out out(t4_ch); uint32_t b = 20; csp::Alternative alt({out.getGuard(b)}); alt.priSelect(); t4_doneB = 1; park(); }
+void t4_writerA(void*) { Out out(t4_ch); uint32_t a = 10; csp::Alternative alt BC_ALTV(BC_G(out, a)); alt.priSelect(); t4_doneA = 1; park(); }
+void t4_writerB(void*) { osDelay(2); Out out(t4_ch); uint32_t b = 20; csp::Alternative alt BC_ALTV(BC_G(out, b)); alt.priSelect(); t4_doneB = 1; park(); }
 void test_T4a() {
     static BlockChan<1> ch; t4_ch = &ch; uint32_t x = 1; ch.output(&x);
     uint32_t fatal0 = g_fatal_count;
@@ -548,7 +652,7 @@ void test_T4a() {
 }
 
 BlockChan<1>* t4b_ch; ThreadSlot t4b_sa; volatile int t4b_doneA = 0;
-void t4b_writerA(void*) { Out out(t4b_ch); uint32_t a = 10; csp::Alternative alt({out.getGuard(a)}); alt.priSelect(); t4b_doneA = 1; park(); }
+void t4b_writerA(void*) { Out out(t4b_ch); uint32_t a = 10; csp::Alternative alt BC_ALTV(BC_G(out, a)); alt.priSelect(); t4b_doneA = 1; park(); }
 void test_T4b() {
     static BlockChan<1> ch; t4b_ch = &ch; uint32_t x = 1; ch.output(&x);
     spawn(t4b_writerA, nullptr, osPriorityNormal, t4b_sa, "T4bA");
@@ -556,7 +660,7 @@ void test_T4b() {
     {   // unrelated ALT: timeout guard ready first -> output guard never enabled
         static Out outB(&ch); uint32_t b = 20;
         static csp::RelTimeoutGuard instant(csp::Time(0));
-        csp::Alternative alt({instant.internal_guard_ptr, outB.getGuard(b)});
+        csp::Alternative alt BC_ALTV(BC_T(instant), BC_G(outB, b));
         (void)alt.priSelect();
     }
     uint32_t v; ch.input(&v); osDelay(5);
@@ -564,13 +668,13 @@ void test_T4b() {
 }
 
 BlockChan<1>* t4c_ch; ThreadSlot t4c_sa; volatile int t4c_doneA = 0;
-void t4c_writerA(void*) { Out out(t4c_ch); uint32_t a = 10; csp::Alternative alt({out.getGuard(a)}); alt.priSelect(); t4c_doneA = 1; park(); }
+void t4c_writerA(void*) { Out out(t4c_ch); uint32_t a = 10; csp::Alternative alt BC_ALTV(BC_G(out, a)); alt.priSelect(); t4c_doneA = 1; park(); }
 void test_T4c() {
     static BlockChan<1> ch; t4c_ch = &ch; uint32_t x = 1; ch.output(&x);
     spawn(t4c_writerA, nullptr, osPriorityNormal, t4c_sa, "T4cA");
     osDelay(3);
     static Out outB(&ch); static uint32_t b = 20;
-    (void)outB.getGuard(b);                        // another writer builds its guard
+    (void)BC_OUT_GUARD(outB, b);                        // another writer builds its guard
     uint32_t v1, v2 = 0; ch.input(&v1); osDelay(3);
     if (ch.pending()) ch.input(&v2);
     printf("   [T4c] writer A (sends 10) done=%d; reader received %lu\r\n", t4c_doneA, (unsigned long)v2);
@@ -593,17 +697,20 @@ void test_T5() {
 }
 
 // ---------------------------------------------------------------------------
-// T6 -- no RTOS heap for timeout guards / Alternatives (STATIC_ALLOCATION)
+// T6 -- timeout guards and Alternatives create no RTOS object and use no
+//       RTOS heap (2.0.1: no timer; 2.0.0: a static timer, but a timer)
 // ---------------------------------------------------------------------------
 void test_T6() {
-    uint32_t u0 = heap_used(), u_in = 0, u_alt = 0, allocs = 0;
+    uint32_t u0 = heap_used(), u_in = 0, u_alt = 0, allocs = 0, tn0 = g_timer_news;
     { csp::RelTimeoutGuard g(csp::Time(5)); u_in = heap_used(); }
     { static BlockChan<1> ch; static In in(&ch); uint32_t v; uint32_t b = heap_used();
-      csp::Alternative alt({in.getGuard(v)}); u_alt = heap_used() - b; }
+      csp::Alternative alt BC_ALTV(BC_G(in, v)); u_alt = heap_used() - b; }
     for (int i = 0; i < 200; ++i) { uint32_t b = heap_used(); csp::RelTimeoutGuard g(csp::Time(5)); if (heap_used() > b) allocs++; }
-    printf("   [T6] RelTimeoutGuard: %lu B heap while alive; Alternative: %lu B; 200 loop constructions -> %lu allocations\r\n",
-           (unsigned long)(u_in - u0), (unsigned long)u_alt, (unsigned long)allocs);
-    result("T6", (u_in == u0 && u_alt == 0 && allocs == 0) ? 1 : 0, "RelTimeoutGuard and Alternative use no RTOS heap");
+    uint32_t timers = g_timer_news - tn0;
+    printf("   [T6] RelTimeoutGuard: %lu B heap while alive; Alternative: %lu B; 200 loop constructions -> %lu allocations, %lu RTOS timers\r\n",
+           (unsigned long)(u_in - u0), (unsigned long)u_alt, (unsigned long)allocs, (unsigned long)timers);
+    result("T6", (u_in == u0 && u_alt == 0 && allocs == 0 && timers == 0) ? 1 : 0,
+           "RelTimeoutGuard and Alternative create no RTOS timer and use no RTOS heap");
 }
 
 // ---------------------------------------------------------------------------
@@ -611,11 +718,11 @@ void test_T6() {
 //        allocation): 50 constructions/destructions of each
 // ---------------------------------------------------------------------------
 void test_T17() {
-#if defined(CSP4CMSIS_ALT_PROTOCOL_OWRV)
+#if BC_OWRV
     uint32_t allocs = 0, fatal0 = g_fatal_count, u0 = heap_used();
     for (int i = 0; i < 50; ++i) {
         uint32_t b = heap_used();
-        { csp::Channel<uint32_t> c; csp::SignalChannel<> s; csp::Barrier bar(3); if (heap_used() > b) allocs++; }
+        { csp::Channel<uint32_t> c; BC_SignalChannel s; csp::Barrier bar(3); if (heap_used() > b) allocs++; }
     }
     printf("   [T17] 50 x (Channel + SignalChannel + Barrier): %lu allocations, heap delta %ld B, fatal=%lu\r\n",
            (unsigned long)allocs, (long)heap_used() - (long)u0, (unsigned long)(g_fatal_count - fatal0));
@@ -665,7 +772,7 @@ void test_T18() {
 // ---------------------------------------------------------------------------
 extern "C" __attribute__((weak)) volatile unsigned int noheap_alloc_calls;
 void test_T19() {
-#if defined(RTE_CMSIS_RTOS2_FreeRTOS) && (configSUPPORT_DYNAMIC_ALLOCATION == 0)
+#if defined(BC_FREERTOS) && (configSUPPORT_DYNAMIC_ALLOCATION == 0)
     if (&noheap_alloc_calls == nullptr) {
         // The linker removed the traps: nothing in the image references
         // pvPortMalloc()/vPortFree() at all (strongest outcome).
@@ -676,7 +783,7 @@ void test_T19() {
         printf("   [T19] FreeRTOS heap-free build: pvPortMalloc()/vPortFree() trap calls during the suite: %u\r\n", calls);
         result("T19", calls == 0 ? 1 : 0, "heap-free build: no dynamic RTOS allocation attempted");
     }
-#elif defined(RTE_CMSIS_RTOS2_RTX5)
+#elif defined(BC_RTX5)
     if (osRtxInfo.mem.common == nullptr) {
         printf("   [T19] RTX5 heap-free build: no dynamic memory pool (osRtxInfo.mem.common == NULL); fatal errors=%lu\r\n",
                (unsigned long)g_fatal_count);
@@ -689,7 +796,7 @@ void test_T19() {
 // T7a -- a read via ALT wakes a writer blocked in ALT (control: plain input)
 // ---------------------------------------------------------------------------
 BlockChan<1>* t7_ch; ThreadSlot t7_s1, t7_s2; volatile int t7_done = 0;
-void t7_writer(void*) { Out out(t7_ch); uint32_t w = 10; csp::Alternative alt({out.getGuard(w)}); alt.priSelect(); t7_done = 1; park(); }
+void t7_writer(void*) { Out out(t7_ch); uint32_t w = 10; csp::Alternative alt BC_ALTV(BC_G(out, w)); alt.priSelect(); t7_done = 1; park(); }
 bool t7_run(bool reader_uses_alt, ThreadSlot& slot) {
     static BlockChan<1> chA, chB;
     BlockChan<1>& ch = reader_uses_alt ? chA : chB; t7_ch = &ch; t7_done = 0;
@@ -697,7 +804,7 @@ bool t7_run(bool reader_uses_alt, ThreadSlot& slot) {
     spawn(t7_writer, nullptr, osPriorityNormal, slot, reader_uses_alt ? "T7alt" : "T7ctl");
     osDelay(3);
     uint32_t r = 0;
-    if (reader_uses_alt) { static In in(&chA); csp::Alternative alt({in.getGuard(r)}); alt.priSelect(); }
+    if (reader_uses_alt) { static In in(&chA); csp::Alternative alt BC_ALTV(BC_G(in, r)); alt.priSelect(); }
     else                 { ch.input(&r); }
     osDelay(5);
     return t7_done == 1;
@@ -736,7 +843,7 @@ void test_T8() {
 #if LIB_V2
 BlockChan<1>* t9_ch; ThreadSlot t9_s; volatile uint32_t t9_ret = 0, t9_val = 0; osThreadId_t t9_tid;
 void t9_reader(void*) {
-    In in(t9_ch); uint32_t v = 0; csp::Alternative alt({in.getGuard(v)});
+    In in(t9_ch); uint32_t v = 0; csp::Alternative alt BC_ALTV(BC_G(in, v));
     alt.priSelect(); t9_val = v; t9_ret = t9_ret + 1; park();
 }
 #endif
@@ -761,8 +868,8 @@ void test_T9() {
 // T10 -- a second ALTing reader on one channel is rejected (assert)
 // ---------------------------------------------------------------------------
 BlockChan<1>* t10_ch; ThreadSlot t10_s1, t10_s2; volatile int t10_done1 = 0, t10_done2 = 0;
-void t10_r1(void*) { In in(t10_ch); uint32_t v; csp::Alternative alt({in.getGuard(v)}); alt.priSelect(); t10_done1 = 1; park(); }
-void t10_r2(void*) { osDelay(2); In in(t10_ch); uint32_t v; csp::Alternative alt({in.getGuard(v)}); alt.priSelect(); t10_done2 = 1; park(); }
+void t10_r1(void*) { In in(t10_ch); uint32_t v; csp::Alternative alt BC_ALTV(BC_G(in, v)); alt.priSelect(); t10_done1 = 1; park(); }
+void t10_r2(void*) { osDelay(2); In in(t10_ch); uint32_t v; csp::Alternative alt BC_ALTV(BC_G(in, v)); alt.priSelect(); t10_done2 = 1; park(); }
 void test_T10() {
     static BlockChan<1> ch; t10_ch = &ch;
     uint32_t fatal0 = g_fatal_count;
@@ -783,7 +890,7 @@ csp::Channel<uint32_t>* t11_ch; ThreadSlot t11_s; volatile int t11_wsel = -1, t1
 void t11_writer(void*) {
     Out out = t11_ch->writer(); uint32_t w = 77;
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt({out.getGuard(w), to.internal_guard_ptr});
+    csp::Alternative alt BC_ALTV(BC_G(out, w), BC_T(to));
     t11_wsel = alt.priSelect(); t11_wdone = 1; park();
 }
 void test_T11() {
@@ -792,7 +899,7 @@ void test_T11() {
     osDelay(3);                                          // writer is waiting in its ALT
     In in = ch.reader(); uint32_t r = 0;
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt({in.getGuard(r), to.internal_guard_ptr});
+    csp::Alternative alt BC_ALTV(BC_G(in, r), BC_T(to));
     int sel = alt.priSelect(); osDelay(3);
     printf("   [T11] reader selected %d (value %lu); writer selected %d, done=%d (0 = channel, 1 = timeout)\r\n",
            sel, (unsigned long)r, t11_wsel, t11_wdone);
@@ -836,7 +943,7 @@ void test_T12() {
 // ---------------------------------------------------------------------------
 constexpr uint32_t T15_SENT = 0xDEADBEEFu;   // "nothing received" marker
 
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
 // T15i -- rendezvous putFromISR() to a waiting ALT reader: the ISR reports
 // success, the reader's select() returns the channel guard. Correct: the
 // reader has the ISR's value (or putFromISR() returns false and the reader
@@ -846,7 +953,7 @@ volatile int t15i_sel = -2; volatile uint32_t t15i_msg = 0; volatile bool t15i_i
 void t15i_reader(void*) {
     In in = t15i_ch->reader(); uint32_t msg = T15_SENT;
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt({in.getGuard(msg), to.internal_guard_ptr});
+    csp::Alternative alt BC_ALTV(BC_G(in, msg), BC_T(to));
     int s = alt.priSelect(); t15i_msg = msg; t15i_sel = s; park();
 }
 void t15i_isr() { Out out = t15i_ch->writer(); t15i_isr_ok = out.putFromISR(1234u); }
@@ -876,16 +983,16 @@ void test_T15i() {
 // X becomes ready and a sender signals before the receiver runs; the receiver
 // takes X (lower index). The signal must still be received by the next
 // select(), and the sender must complete.
-BlockChan<1>* t15s_x; csp::SignalChannel<>* t15s_sig; ThreadSlot t15s_rs, t15s_ss;
+BlockChan<1>* t15s_x; BC_SignalChannel* t15s_sig; ThreadSlot t15s_rs, t15s_ss;
 osThreadId_t t15s_sender_tid; volatile int t15s_sel1 = -2, t15s_sel2 = -2, t15s_sent = 0;
-#if defined(CSP4CMSIS_ALT_PROTOCOL_OWRV)
+#if BC_OWRV
 void t15s_receiver(void*) {                  // 2.0: a signal is a data-less rendezvous
     In xin(t15s_x); uint32_t xv = 0;
     csp::Chanin<csp::Signal> sin = t15s_sig->reader(); csp::Signal sv;
-    csp::Alternative alt1({xin.getGuard(xv), sin.getGuard(sv)});
+    csp::Alternative alt1 BC_ALTV(BC_G(xin, xv), BC_G(sin, sv));
     t15s_sel1 = alt1.priSelect();
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt2({xin.getGuard(xv), sin.getGuard(sv), to.internal_guard_ptr});
+    csp::Alternative alt2 BC_ALTV(BC_G(xin, xv), BC_G(sin, sv), BC_T(to));
     t15s_sel2 = alt2.priSelect();
     park();
 }
@@ -898,10 +1005,10 @@ void t15s_sender(void*) {
 void t15s_receiver(void*) {
     In xin(t15s_x); uint32_t xv = 0;
     auto* sig = t15s_sig->getInternal();
-    csp::Alternative alt1({xin.getGuard(xv), sig->getInputGuard()});
+    csp::Alternative alt1 BC_ALTV(BC_G(xin, xv), sig->getInputGuard());
     t15s_sel1 = alt1.priSelect();
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt2({xin.getGuard(xv), sig->getInputGuard(), to.internal_guard_ptr});
+    csp::Alternative alt2 BC_ALTV(BC_G(xin, xv), sig->getInputGuard(), BC_T(to));
     t15s_sel2 = alt2.priSelect();
     park();
 }
@@ -912,7 +1019,7 @@ void t15s_sender(void*) {
 }
 #endif
 void test_T15s() {
-    static BlockChan<1> x; static csp::SignalChannel<> sig; t15s_x = &x; t15s_sig = &sig;
+    static BlockChan<1> x; static BC_SignalChannel sig; t15s_x = &x; t15s_sig = &sig;
     spawn(t15s_receiver, nullptr, osPriorityNormal, t15s_rs, "T15sR");
     t15s_sender_tid = spawn(t15s_sender, nullptr, osPriorityAboveNormal, t15s_ss, "T15sS");
     osDelay(3);                                          // receiver waits on both guards
@@ -946,7 +1053,7 @@ uint32_t t15_phantoms = 0, t15_silents = 0, t15_badtrials = 0;
 void t15_target(void*) {
     In in = t15_ch->reader(); In xin(t15_x);
     static uint32_t msg, xv;
-    csp::Alternative alt({in.getGuard(msg), xin.getGuard(xv)});
+    csp::Alternative alt BC_ALTV(BC_G(in, msg), BC_G(xin, xv));
     for (;;) {
         msg = T15_SENT;
         int s = alt.priSelect();
@@ -959,7 +1066,7 @@ void t15_reset()  { t15_n = 0; t15_aggr_done = false; t15_w = t15_w + 1; }
 bool t15_probe()  { return t15_aggr_done; }
 void t15_victim() {
     static Out out = t15_ch->writer(); static uint32_t w;
-    static csp::Alternative alt({out.getGuard(w)});
+    static csp::Alternative alt BC_ALTV(BC_G(out, w));
     w = t15_w;
     alt.priSelect();
 }
@@ -994,11 +1101,11 @@ void test_T15() {
 // ---------------------------------------------------------------------------
 const char* volatile g_current_test = "-";
 
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
 // T16s -- SignalChannel putFromISR() to a receiver blocked in input(): it
 // must release the receiver (or return false).
-csp::SignalChannel<>* t16s_sig; ThreadSlot t16s_s; volatile int t16s_done = 0; volatile bool t16s_ok = false;
-#if defined(CSP4CMSIS_ALT_PROTOCOL_OWRV)
+BC_SignalChannel* t16s_sig; ThreadSlot t16s_s; volatile int t16s_done = 0; volatile bool t16s_ok = false;
+#if BC_OWRV
 void t16s_receiver(void*) { csp::Chanin<csp::Signal> in = t16s_sig->reader(); csp::Signal s; in >> s; t16s_done = 1; park(); }
 void t16s_isr() { csp::Chanout<csp::Signal> out = t16s_sig->writer(); t16s_ok = out.putFromISR(csp::Signal{}); }
 #else
@@ -1006,7 +1113,7 @@ void t16s_receiver(void*) { t16s_sig->getInternal()->input(nullptr); t16s_done =
 void t16s_isr() { t16s_ok = t16s_sig->getInternal()->putFromISR(); }
 #endif
 void test_T16s() {
-    static csp::SignalChannel<> sig; t16s_sig = &sig; g_current_test = "T16s";
+    static BC_SignalChannel sig; t16s_sig = &sig; g_current_test = "T16s";
     spawn(t16s_receiver, nullptr, osPriorityNormal, t16s_s, "T16s");
     osDelay(3);                                          // receiver blocked in input()
     g_isr_op = t16s_isr; isr_fire(); osDelay(3); g_isr_op = nullptr;
@@ -1022,7 +1129,7 @@ void test_T16s() {
 }
 #endif
 
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
 // T16n -- KeepNewest rendezvous: output() while a reader waits in an ALT.
 // The reader is waiting, so the value must be taken (API: "data is captured
 // only if a receiver is already waiting").
@@ -1031,7 +1138,7 @@ volatile int t16n_sel = -2; volatile uint32_t t16n_msg = 0;
 void t16n_reader(void*) {
     In in = t16n_ch->reader(); uint32_t msg = T15_SENT;
     csp::RelTimeoutGuard to(csp::Time(50));
-    csp::Alternative alt({in.getGuard(msg), to.internal_guard_ptr});
+    csp::Alternative alt BC_ALTV(BC_G(in, msg), BC_T(to));
     int s = alt.priSelect(); t16n_msg = msg; t16n_sel = s; park();
 }
 void test_T16n() {
@@ -1054,7 +1161,7 @@ void test_T16n() {
 }
 #endif
 
-#if !defined(CSP4CMSIS_ISR_WRITER_API)
+#if !BC_ISR_WRITER
 // T16a (sweep) -- rendezvous putFromISR() vs a plain reader entering input().
 // The task path protects AltChanSyncBase with the mutex, putFromISR() with
 // BASEPRI; they do not exclude each other. registerWaitingTask() stores
@@ -1106,10 +1213,15 @@ struct PreInitProbe {
     osKernelState_t state = osKernelError;
     bool static_sem_ok = false, dynamic_sem_ok = false;
     osSemaphoreId_t static_sem = nullptr;
+#if defined(CSP4CMSIS_STATIC_ALLOCATION)
     csp::internal::csp_static_semaphore_storage_t cb;
+#endif
     PreInitProbe() {
         state = osKernelGetState();
-        osSemaphoreAttr_t a = {}; a.cb_mem = &cb; a.cb_size = sizeof(cb);
+        osSemaphoreAttr_t a = {};
+#if defined(CSP4CMSIS_STATIC_ALLOCATION)
+        a.cb_mem = &cb; a.cb_size = sizeof(cb);
+#endif
         static_sem = osSemaphoreNew(1, 0, &a);
         static_sem_ok = static_sem != nullptr;
         osSemaphoreId_t d = osSemaphoreNew(1, 0, nullptr);
@@ -1138,6 +1250,336 @@ void test_T14() {
 }
 
 // ---------------------------------------------------------------------------
+// T20..T24 -- timeout guards. 2.0.1: the deadline is fixed when select()
+// starts and select() waits with the remaining ticks (no RTOS timer).
+// A "never" channel has no writer; tick counts from osKernelGetTickCount().
+// ---------------------------------------------------------------------------
+uint32_t ticks_now() { return osKernelGetTickCount(); }
+
+// T20 -- accuracy: a timeout of d ticks returns after d or d + 1 ticks
+void test_T20() {
+    g_current_test = "T20";
+    static csp::Channel<uint32_t> never; In in = never.reader(); uint32_t v = 0;
+    const uint32_t ds[] = {1, 3, 10}; bool ok = true;
+    for (uint32_t d : ds) {
+        uint32_t lo = 0xFFFFFFFFu, hi = 0; int bad_sel = 0;
+        for (int rep = 0; rep < 5; ++rep) {
+            osDelay(1); spin((uint32_t)rep * 997u);           // vary the phase within the tick
+            csp::RelTimeoutGuard to{csp::Time(d)};
+            csp::Alternative alt BC_ALTV(BC_G(in, v), BC_T(to));
+            uint32_t t1 = ticks_now(); int sel = alt.priSelect(); uint32_t dt = ticks_now() - t1;
+            if (sel != 1) bad_sel++;
+            if (dt < lo) lo = dt;
+            if (dt > hi) hi = dt;
+        }
+        printf("   [T20] timeout %lu ticks: returned after %lu..%lu ticks, wrong guard %d/5\r\n",
+               (unsigned long)d, (unsigned long)lo, (unsigned long)hi, bad_sel);
+        if (bad_sel || lo < d || hi > d + 1) ok = false;
+    }
+    result("T20", ok ? 1 : 0, "a timeout of d ticks is selected after d or d+1 ticks");
+}
+
+// T21/T23 writer: on F_START waits t21_delay ticks, then writes t21_val (plain rendezvous)
+csp::Channel<uint32_t>* t21_ch; ThreadSlot t21_s; osThreadId_t t21_tid = nullptr;
+volatile uint32_t t21_delay = 0, t21_val = 0, t21_sent = 0;
+void t21_writer(void*) {
+    Out out = t21_ch->writer();
+    for (;;) {
+        osThreadFlagsWait(F_START, osFlagsWaitAny, osWaitForever);
+        if (t21_delay) osDelay(t21_delay);
+        uint32_t x = t21_val; out << x; t21_sent = t21_sent + 1;
+    }
+}
+void t21_start() {
+    static csp::Channel<uint32_t> ch;
+    if (t21_tid == nullptr) { t21_ch = &ch; t21_tid = spawn(t21_writer, nullptr, osPriorityAboveNormal, t21_s, "T21w"); osDelay(1); }
+}
+
+// T21 -- a timeout racing a channel that becomes ready around the deadline:
+//        exactly one guard is selected; a channel item is never lost or doubled
+void test_T21() {
+    g_current_test = "T21";
+    t21_start(); In in = t21_ch->reader();
+    constexpr uint32_t D = 10; bool ok = true;
+    for (uint32_t k = D - 2; k <= D + 2; ++k) {
+        uint32_t c = 0, t = 0;
+        for (int rep = 0; rep < 3; ++rep) {
+            uint32_t val = 1000u * k + (uint32_t)rep, v = 0, sent0 = t21_sent;
+            t21_delay = k; t21_val = val; osThreadFlagsSet(t21_tid, F_START);
+            csp::RelTimeoutGuard to{csp::Time(D)};
+            csp::Alternative alt BC_ALTV(BC_G(in, v), BC_T(to));
+            uint32_t t1 = ticks_now(); int sel = alt.priSelect(); uint32_t dt = ticks_now() - t1;
+            if (sel == 0) { c++; if (v != val) ok = false; }
+            else {                                            // timed out: the item must still be there
+                t++; if (dt < D || dt > D + 1) ok = false;
+                uint32_t w = 0; in >> w; if (w != val) ok = false;
+            }
+            osDelay(2);
+            if (t21_sent != sent0 + 1) ok = false;            // exactly one transfer
+        }
+        printf("   [T21] channel ready after %lu ticks, timeout %lu: channel %lu/3, timeout %lu/3\r\n",
+               (unsigned long)k, (unsigned long)D, (unsigned long)c, (unsigned long)t);
+        if (k + 2 <= D && c != 3) ok = false;                 // clearly before the deadline: channel
+        if (k >= D + 2 && t != 3) ok = false;                 // clearly after: timeout
+    }
+    result("T21", ok ? 1 : 0, "timeout vs late channel: one guard selected, the item neither lost nor doubled");
+}
+
+// T22 -- several timeout guards: the earliest deadline is selected
+void test_T22() {
+    g_current_test = "T22";
+    static csp::Channel<uint32_t> never; In in = never.reader(); uint32_t v = 0;
+    csp::RelTimeoutGuard a{csp::Time(30)}, b{csp::Time(5)}, c{csp::Time(15)};
+    csp::Alternative alt BC_ALTV(BC_G(in, v), BC_T(a), BC_T(b), BC_T(c));
+    uint32_t t1 = ticks_now(); int sel = alt.priSelect(); uint32_t dt = ticks_now() - t1;
+    printf("   [T22] timeouts (30, 5, 15): selected guard %d after %lu ticks (expect 2 after 5..6)\r\n", sel, (unsigned long)dt);
+    result("T22", (sel == 2 && dt >= 5 && dt <= 6) ? 1 : 0, "several timeout guards: the earliest deadline wins");
+}
+
+// T23 -- zero timeout: ready at once, never waits; a ready channel listed first wins
+void test_T23() {
+    g_current_test = "T23";
+    static csp::Channel<uint32_t> never; In nin = never.reader(); uint32_t v = 0;
+    csp::RelTimeoutGuard z{csp::Time(0)};
+    csp::Alternative alt BC_ALTV(BC_G(nin, v), BC_T(z));
+    uint32_t t1 = ticks_now(); int sel = alt.priSelect(); uint32_t dt = ticks_now() - t1;
+    t21_start(); In in = t21_ch->reader(); uint32_t w = 0, sent0 = t21_sent;
+    t21_delay = 0; t21_val = 4242; osThreadFlagsSet(t21_tid, F_START); osDelay(2);   // writer now waits
+    csp::RelTimeoutGuard z2{csp::Time(0)};
+    csp::Alternative alt2 BC_ALTV(BC_G(in, w), BC_T(z2));
+    int sel2 = alt2.priSelect(); osDelay(2);
+    printf("   [T23] no channel: guard %d after %lu ticks; channel ready: guard %d, value %lu, transfers %lu\r\n",
+           sel, (unsigned long)dt, sel2, (unsigned long)w, (unsigned long)(t21_sent - sent0));
+    result("T23", (sel == 1 && dt == 0 && sel2 == 0 && w == 4242 && t21_sent == sent0 + 1) ? 1 : 0,
+           "zero timeout: selected at once; a ready channel listed before it wins");
+}
+
+// T24 -- stale wakeups do not postpone a timeout (2.0.0 restarted its timer
+//        in every select() round: a wakeup per tick keeps it from expiring,
+//        here until the waker stops after 50 ticks)
+#if BC_OWRV
+ThreadSlot t24_s; osThreadId_t t24_target = nullptr; volatile int t24_stop = 0;
+void t24_waker(void*) {                                    // a stale ALT wakeup every tick, at most 50
+    for (int i = 0; i < 50 && !t24_stop; ++i) { osDelay(1); if (!t24_stop) (void)osThreadFlagsSet(t24_target, csp::internal::altFlag(0)); }
+    park();
+}
+#endif
+void test_T24() {
+    g_current_test = "T24";
+#if BC_OWRV
+    static csp::Channel<uint32_t> never; In in = never.reader(); uint32_t v = 0;
+    t24_target = osThreadGetId(); t24_stop = 0;
+    spawn(t24_waker, nullptr, osPriorityAboveNormal, t24_s, "T24w");
+    csp::RelTimeoutGuard to{csp::Time(10)};
+    csp::Alternative alt BC_ALTV(BC_G(in, v), BC_T(to));
+    uint32_t t1 = ticks_now(); int sel = alt.priSelect(); uint32_t dt = ticks_now() - t1;
+    t24_stop = 1; osDelay(3); (void)osThreadFlagsClear(csp::internal::ALT_FLAG_MASK);
+    printf("   [T24] stale wakeup every tick, timeout 10: guard %d after %lu ticks\r\n", sel, (unsigned long)dt);
+    result("T24", (sel == 1 && dt >= 10 && dt <= 11) ? 1 : 0, "stale wakeups do not postpone a timeout");
+#else
+    result("T24", -1, "stale wakeups do not postpone a timeout (needs 2.0's ALT flag layout)");
+#endif
+}
+
+
+// ===========================================================================
+// T25..T31 -- processes, Run(), time conversion (2.1.0). T25..T27 also run on
+// 2.0.x (same API); on 2.0.1, T28..T30 are positive controls and must FAIL.
+// ===========================================================================
+#if LIB_V2
+#if BC_SLEEPFOR_TIME
+  #define LIB_2_1 1
+#else
+  #define LIB_2_1 0
+#endif
+
+// A process that records its thread priority and that it ran, then returns
+// (or parks, for the tests that inspect a live thread).
+constexpr uint32_t PROBE_WORDS = 128, PROBE_TOUCH = 16;
+struct ProbeProc : csp::CSProcessStatic<PROBE_WORDS> {
+    const char*  nm;
+    osPriority_t own;                      // CSP_PRIORITY_UNSPECIFIED: no override
+    bool         parks;
+    volatile osPriority_t seen = osPriorityError;
+    volatile int          ran  = 0;
+    ProbeProc(const char* n, osPriority_t p, bool k) : nm(n), own(p), parks(k) {}
+    const char* name() const override { return nm; }
+    osPriority_t taskPriority() const override { return own; }
+    void run() override {
+        volatile uint32_t touch[PROBE_TOUCH];      // some stack use, for T27
+        for (uint32_t i = 0; i < PROBE_TOUCH; ++i) touch[i] = i;
+        (void)touch[PROBE_TOUCH - 1];
+        seen = osThreadGetPriority(osThreadGetId());
+        ran = ran + 1;
+        if (parks) park();
+    }
+};
+
+// T25 -- TerminatingNetwork: Run() returns after every process returned;
+//        taskPriority() overrides the composition priority, the others run at it;
+//        without a priority argument the composition priority is osPriorityLow
+ProbeProc t25_a("T25a", CSP_PRIORITY_UNSPECIFIED, false), t25_b("T25b", osPriorityLow1, false),
+          t25_c("T25c", CSP_PRIORITY_UNSPECIFIED, false),
+          t25_d("T25d", CSP_PRIORITY_UNSPECIFIED, false), t25_e("T25e", CSP_PRIORITY_UNSPECIFIED, false);
+void test_T25() {
+    g_current_test = "T25";
+    csp::Run(csp::InParallel(t25_a, t25_b, t25_c), csp::ExecutionMode::TerminatingNetwork, osPriorityBelowNormal);
+    bool all = t25_a.ran == 1 && t25_b.ran == 1 && t25_c.ran == 1;
+    bool prio = t25_a.seen == osPriorityBelowNormal && t25_b.seen == osPriorityLow1 && t25_c.seen == osPriorityBelowNormal;
+    csp::Run(csp::InParallel(t25_d, t25_e), csp::ExecutionMode::TerminatingNetwork);   // default composition priority
+    bool dflt = t25_d.ran == 1 && t25_e.ran == 1 && t25_d.seen == osPriorityLow && t25_e.seen == osPriorityLow;
+    printf("   [T25] after Run(): ran %d/%d/%d; priorities %d/%d/%d (expect %d/%d/%d); default run: %d/%d at %d/%d (expect %d)\r\n",
+           t25_a.ran, t25_b.ran, t25_c.ran, (int)t25_a.seen, (int)t25_b.seen, (int)t25_c.seen,
+           (int)osPriorityBelowNormal, (int)osPriorityLow1, (int)osPriorityBelowNormal,
+           t25_d.ran, t25_e.ran, (int)t25_d.seen, (int)t25_e.seen, (int)osPriorityLow);
+    result("T25", (all && prio && dflt) ? 1 : 0,
+           "TerminatingNetwork returns after all processes; taskPriority() overrides the composition priority (default osPriorityLow)");
+}
+
+// T26 -- StaticNetwork: Run() returns before any (lower-priority) process ran;
+//        each thread is named after name(); all run afterwards
+// T27 -- forEachProcess visits every process in declaration order;
+//        stackHighWaterMarkWords(): unavailable before Run(), afterwards in (0, N)
+//        and reflecting the stack a process used
+ProbeProc t26_a("T26a", CSP_PRIORITY_UNSPECIFIED, true), t26_b("T26b", CSP_PRIORITY_UNSPECIFIED, true),
+          t26_c("T26c", osPriorityLow2, true);
+void test_T26_T27() {
+    g_current_test = "T26";
+    uint32_t hwm_before = t26_a.stackHighWaterMarkWords();
+    auto net = csp::InParallel(t26_a, t26_b, t26_c);
+    csp::Run(net, csp::ExecutionMode::StaticNetwork, osPriorityBelowNormal);
+    int ran_at_return = t26_a.ran + t26_b.ran + t26_c.ran;
+    bool names = t26_a.taskHandle() && t26_b.taskHandle() && t26_c.taskHandle() &&
+                 strcmp(osThreadGetName(t26_a.taskHandle()), "T26a") == 0 &&
+                 strcmp(osThreadGetName(t26_c.taskHandle()), "T26c") == 0;
+    osDelay(5);
+    int ran_later = t26_a.ran + t26_b.ran + t26_c.ran;
+    printf("   [T26] processes run when Run() returned: %d (expect 0); later: %d (expect 3); thread names %s\r\n",
+           ran_at_return, ran_later, names ? "ok" : "WRONG");
+    result("T26", (ran_at_return == 0 && ran_later == 3 && names) ? 1 : 0,
+           "StaticNetwork returns at once; threads named after name(); all processes run");
+
+    g_current_test = "T27";
+    const char* order[3] = {nullptr, nullptr, nullptr}; int n = 0;
+    uint32_t hwm[3] = {0, 0, 0};
+    net.forEachProcess([&](csp::CSProcess& p) { if (n < 3) { order[n] = p.name(); hwm[n] = p.stackHighWaterMarkWords(); } ++n; });
+    bool in_order = n == 3 && order[0] && strcmp(order[0], "T26a") == 0 && strcmp(order[1], "T26b") == 0 && strcmp(order[2], "T26c") == 0;
+    bool hwm_ok = hwm_before == CSP_STACK_HWM_UNAVAILABLE;
+    for (int i = 0; i < 3; ++i) hwm_ok = hwm_ok && hwm[i] > 0 && hwm[i] <= PROBE_WORDS - PROBE_TOUCH;
+    printf("   [T27] forEachProcess: %d processes, order %s; HWM before Run(): %s; after: %lu/%lu/%lu words free of %lu (expect 1..%lu)\r\n",
+           n, in_order ? "ok" : "WRONG", hwm_before == CSP_STACK_HWM_UNAVAILABLE ? "unavailable" : "WRONG",
+           (unsigned long)hwm[0], (unsigned long)hwm[1], (unsigned long)hwm[2], (unsigned long)PROBE_WORDS, (unsigned long)(PROBE_WORDS - PROBE_TOUCH));
+    result("T27", (in_order && hwm_ok) ? 1 : 0,
+           "forEachProcess visits every process in order; stackHighWaterMarkWords() unavailable before Run(), then in words");
+}
+
+// T28 -- a failed osThreadNew() in Run() is a fatal error (2.0.x: printf and
+//        continue, so a TerminatingNetwork caller waited for ever)
+// T28 and T29 run their victims one after another in one slot: a victim parks
+// in the fatal hook and is terminated (which frees a static TCB at once,
+// unlike a thread's own exit) before the slot is reused.
+ThreadSlot fatal_slot; ProbeProc t28_p("T28p", CSP_PRIORITY_UNSPECIFIED, false);  // never gets a thread
+volatile int t28_after1 = 0, t28_after2 = 0;
+void t28_static(void*)      { g_fail_next_thread_new = 1; csp::Run(csp::InParallel(t28_p), csp::ExecutionMode::StaticNetwork);      t28_after1 = 1; park(); }
+void t28_terminating(void*) { g_fail_next_thread_new = 1; csp::Run(csp::InParallel(t28_p), csp::ExecutionMode::TerminatingNetwork); t28_after2 = 1; park(); }
+void run_victim(osThreadFunc_t fn, const char* name) {
+    osThreadId_t t = spawn(fn, nullptr, osPriorityAboveNormal, fatal_slot, name);
+    osDelay(3);
+    if (t) (void)osThreadTerminate(t);
+}
+void test_T28() {
+    g_current_test = "T28";
+    uint32_t f0 = g_fatal_count;
+    run_victim(t28_static, "T28s");
+    uint32_t f1 = g_fatal_count; const char* m1 = g_fatal_msg;
+    run_victim(t28_terminating, "T28t");
+    uint32_t f2 = g_fatal_count; const char* m2 = g_fatal_msg;
+    bool msg_ok = m1 && m2 && strstr(m1, "osThreadNew") && strstr(m2, "osThreadNew");
+    printf("   [T28] StaticNetwork: fatal %lu (\"%s\"), returned %d; TerminatingNetwork: fatal %lu, returned %d\r\n",
+           (unsigned long)(f1 - f0), (f1 != f0 && m1) ? m1 : "-", t28_after1, (unsigned long)(f2 - f1), t28_after2);
+    result("T28", (f1 == f0 + 1 && f2 == f1 + 1 && msg_ok && !t28_after1 && !t28_after2) ? 1 : 0,
+           "a failed osThreadNew() in Run() is a fatal error, in both execution modes");
+}
+
+// T29 -- a 17th guard is a fatal error (2.0.x ignored it silently)
+volatile int t29_after = 0;
+void t29_alt(void*) {
+    static csp::Channel<uint32_t> ch; In in = ch.reader(); uint32_t v = 0;
+    csp::Alternative alt;
+    for (int i = 0; i < 17; ++i) alt.addBinding(in | v);
+    t29_after = 1; park();
+}
+void test_T29() {
+    g_current_test = "T29";
+    uint32_t f0 = g_fatal_count;
+    run_victim(t29_alt, "T29");
+    const char* m = g_fatal_msg;
+    bool ok = g_fatal_count == f0 + 1 && !t29_after && m && strstr(m, "16 guards");
+    printf("   [T29] 17 guards: fatal %lu (\"%s\"), construction completed %d\r\n",
+           (unsigned long)(g_fatal_count - f0), (g_fatal_count != f0 && m) ? m : "-", t29_after);
+    result("T29", ok ? 1 : 0, "a 17th guard in an Alternative is a fatal error");
+}
+
+// T30 -- Seconds()/Milliseconds() round up (2.0.x: down, and ms * freq
+//        overflowed 32 bits above ~71.6 min at 1 kHz). Checked as properties,
+//        in 64 bits: 0 stays 0; otherwise ticks / freq is never shorter than
+//        requested, and at most one tick longer; saturated at 0xFFFFFFFE
+//        (osWaitForever is not a duration).
+bool t30_ok(uint32_t amount, uint64_t per_second, uint32_t ticks, uint64_t f) {
+    const uint64_t want = (uint64_t)amount * f;           // requested duration, in ticks * per_second
+    if (amount == 0) return ticks == 0;
+    if (ticks == 0xFFFFFFFEu) return want > 0xFFFFFFFDull * per_second;   // saturated: the exact count is >= 0xFFFFFFFE
+    return (uint64_t)ticks * per_second >= want && ((uint64_t)ticks - 1) * per_second < want;
+}
+void test_T30() {
+    g_current_test = "T30";
+    const uint32_t f = osKernelGetTickFreq();
+    const uint32_t big = (uint32_t)(0x100000000ull / f) + 12345u;     // big * f overflows 32 bits
+    const uint32_t ms[] = {0u, 1u, 3u, 7u, 999u, 1000u, 1001u, 12345u, big, 0xFFFFFFFFu};
+    const uint32_t s[]  = {0u, 1u, 7u, 3600u, 0xFFFFFFFFu};
+    int bad = 0;
+    for (uint32_t m : ms) {
+        uint32_t got = csp::Milliseconds(m).to_ticks();
+        if (!t30_ok(m, 1000, got, f)) { ++bad; printf("   [T30] Milliseconds(%lu) = %lu ticks: wrong\r\n", (unsigned long)m, (unsigned long)got); }
+    }
+    for (uint32_t x : s) {
+        uint32_t got = csp::Seconds(x).to_ticks();
+        if (!t30_ok(x, 1, got, f)) { ++bad; printf("   [T30] Seconds(%lu) = %lu ticks: wrong\r\n", (unsigned long)x, (unsigned long)got); }
+    }
+    // Saturation: Seconds(0xFFFFFFFF) exceeds 32 bits of ticks at any frequency above 1 Hz.
+    const bool sat = f <= 1u || csp::Seconds(0xFFFFFFFFu).to_ticks() == 0xFFFFFFFEu;
+    printf("   [T30] tick frequency %lu Hz: %d of %u conversions wrong; Milliseconds(1) = %lu, Milliseconds(%lu) = %lu, saturation %s\r\n",
+           (unsigned long)f, bad, (unsigned)(sizeof(ms) / sizeof(ms[0]) + sizeof(s) / sizeof(s[0])),
+           (unsigned long)csp::Milliseconds(1).to_ticks(), (unsigned long)big, (unsigned long)csp::Milliseconds(big).to_ticks(),
+           sat ? "ok" : "WRONG");
+    result("T30", (bad == 0 && sat) ? 1 : 0, "Seconds()/Milliseconds(): rounded up, 0 stays 0, no 32-bit overflow, saturated");
+}
+
+// T31 -- SleepFor(Time) waits the given number of ticks (2.1.0 overload)
+void test_T31() {
+    g_current_test = "T31";
+#if LIB_2_1
+    osDelay(1);                                          // start at a tick edge
+    uint32_t t1 = ticks_now(); csp::SleepFor(csp::Time(5)); uint32_t d1 = ticks_now() - t1;
+    osDelay(1);
+    uint32_t t2 = ticks_now(); csp::SleepFor(csp::Time(0)); uint32_t d2 = ticks_now() - t2;
+    printf("   [T31] SleepFor(Time(5)): %lu ticks (expect 5..6); SleepFor(Time(0)): %lu ticks (expect 0)\r\n",
+           (unsigned long)d1, (unsigned long)d2);
+    result("T31", (d1 >= 5 && d1 <= 6 && d2 == 0) ? 1 : 0, "SleepFor(Time) sleeps the given number of ticks");
+#else
+    result("T31", -1, "SleepFor(Time) (2.1.0 API)");
+#endif
+}
+#else   // 1.x: different process API
+void test_T25() { result("T25", -1, "Run(): TerminatingNetwork and priority precedence (2.0 API)"); }
+void test_T26_T27() { result("T26", -1, "Run(): StaticNetwork (2.0 API)"); result("T27", -1, "forEachProcess, stackHighWaterMarkWords (2.0 API)"); }
+void test_T28() { result("T28", -1, "failed osThreadNew() in Run() (2.0 API)"); }
+void test_T29() { result("T29", -1, "17th guard (2.0 API)"); }
+void test_T30() { result("T30", -1, "time conversion (2.0 API)"); }
+void test_T31() { result("T31", -1, "SleepFor(Time) (2.1.0 API)"); }
+#endif
+
+// ---------------------------------------------------------------------------
 RunnerSlot runner_slot;
 void runner(void*) {
     printf("\r\n=== CSP4CMSIS BufferedChannel regression suite ===\r\n");
@@ -1146,52 +1588,33 @@ void runner(void*) {
     test_T0();  test_T2();  test_T4a(); test_T4b(); test_T4c();
     test_T5();  test_T6();  test_T17(); test_T18(); test_T7a(); test_T8();  test_T9();  test_T10();
     test_T11(); test_T12(); test_T14(); test_T15i(); test_T15s(); test_T16s(); test_T16n();
-    test_T1a(); test_T1b(); test_T3();  test_T3i(); test_T13(); test_T13b(); test_T15(); test_T16a(); test_T19();
+    test_T1a(); test_T1b(); test_T3();  test_T3i(); test_T13(); test_T13b(); test_T15(); test_T16a();
+    test_T20(); test_T21(); test_T22(); test_T23(); test_T24();
+    test_T25(); test_T26_T27(); test_T28(); test_T29(); test_T30(); test_T31(); test_T19();
     printf("SUMMARY: PASS=%lu FAIL=%lu SKIP=%lu REPLACED=%lu; heap used=%lu B; runner stack min free=%lu B\r\n",
            (unsigned long)g_pass, (unsigned long)g_fail, (unsigned long)g_skip, (unsigned long)g_replaced, (unsigned long)heap_used(),
            (unsigned long)osThreadGetStackSpace(osThreadGetId()));
     printf("\x04");
     fflush(stdout);
-#if defined(HWTEST_SOAK)
-    // DK-E8 soak (build type RTX5-Soak): restart and run the suite again.
-    osDelay(200);
-    NVIC_SystemReset();
-#endif
     park();
 }
 
 } // namespace
 
 // A fault (e.g. T16a's copy through a null pointer) ends the run with a report
-// instead of hanging in the startup file's default handler.
-// DK-E8: report through hwtest_raw_puts() (main.cpp: polled UART4 registers),
-// not printf(), whose stdio lock needs an RTOS mutex that handler mode cannot
-// take; also report the stacked PC/LR/xPSR of the faulting context.
-extern "C" void hwtest_raw_puts(const char* s);
-extern "C" void bc_hardfault(const uint32_t* frame, uint32_t exc_return) {
-    static char b[300];
-    snprintf(b, sizeof b, "\r\n!! HardFault during %s: CFSR=0x%08lx HFSR=0x%08lx BFAR=0x%08lx MMFAR=0x%08lx\r\n"
-             "!! stacked PC=0x%08lx LR=0x%08lx xPSR=0x%08lx EXC_RETURN=0x%08lx\r\nSUMMARY: aborted by HardFault\r\n\x04",
-             g_current_test, (unsigned long)SCB->CFSR, (unsigned long)SCB->HFSR, (unsigned long)SCB->BFAR,
-             (unsigned long)SCB->MMFAR, (unsigned long)frame[6], (unsigned long)frame[5], (unsigned long)frame[7],
-             (unsigned long)exc_return);
-    hwtest_raw_puts(b);
+// instead of hanging in the startup file's default handler. Where the project
+// already defines HardFault_Handler (STM32CubeMX), BC_HARDFAULT_HANDLER renames
+// this one and the project's handler calls it.
+#ifndef BC_HARDFAULT_HANDLER
+#define BC_HARDFAULT_HANDLER HardFault_Handler
+#endif
+extern "C" void BC_HARDFAULT_HANDLER(void) {
+    printf("!! HardFault during %s: CFSR=0x%08lx HFSR=0x%08lx BFAR=0x%08lx MMFAR=0x%08lx\r\n", g_current_test,
+           (unsigned long)SCB->CFSR, (unsigned long)SCB->HFSR, (unsigned long)SCB->BFAR, (unsigned long)SCB->MMFAR);
+    printf("SUMMARY: aborted by HardFault\r\n\x04");
     for (;;) { }
 }
-extern "C" __attribute__((naked)) void HardFault_Handler(void) {
-    __asm volatile(
-        "tst lr, #4       \n"
-        "ite eq           \n"
-        "mrseq r0, msp    \n"
-        "mrsne r0, psp    \n"
-        "mov r1, lr       \n"
-        "b bc_hardfault   \n");
-}
 
-#if defined(HWTEST_CHECKS)
-#include "hw_checks.inc"      // DK-E8 hardware-only checks: replace the suite runner
-#else
 extern "C" void csp_app_main_init(void) {
     spawn(runner, nullptr, osPriorityHigh, runner_slot, "runner");
 }
-#endif

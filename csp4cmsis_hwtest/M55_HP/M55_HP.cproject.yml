@@ -86,7 +86,7 @@ project:
         - -Wl,--wrap=osEventFlagsSet,--wrap=osThreadFlagsSet,--wrap=osSemaphoreRelease
         - -Wl,--wrap=osSemaphoreAcquire,--wrap=osMessageQueuePut,--wrap=osMessageQueueGet
         - -Wl,--wrap=osMessageQueueGetCount,--wrap=osMessageQueueGetSpace
-        - -Wl,--wrap=osMutexAcquire,--wrap=osMutexRelease
+        - -Wl,--wrap=osMutexAcquire,--wrap=osMutexRelease,--wrap=osTimerNew,--wrap=osThreadNew
     - for-compiler: AC6
       CPP:
         - -fno-exceptions
