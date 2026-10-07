@@ -7,9 +7,9 @@
  * (see application.cpp for the network itself: two Senders racing into a
  * Receiver via Alternative).
  *
- * Backend-conditional (CSP4CMSIS_RTOS2_BACKEND_FREERTOS vs.
- * CSP4CMSIS_RTOS2_BACKEND_RTX5, same macros csp_rtos_static.h selects on)
- * since this file's own board-bringup code -- not csp4cmsis itself -- has
+ * RTOS-conditional (RTE_CMSIS_RTOS2_FreeRTOS from RTE_Components.h: the
+ * project's CMSIS-RTOS2 component, which CSP4CMSIS 3.0 also detects its
+ * backend from) since this file's own board-bringup code -- not csp4cmsis itself -- has
  * genuine FreeRTOS-kernel-bootstrap-specific pieces with no portable
  * equivalent (see the block below). Discovered during the RTX5 validation
  * pass: csp4cmsis's own library source needed zero changes to build
@@ -21,7 +21,7 @@
 #include CMSIS_device_header
 
 #include "cmsis_os2.h"
-#if defined(CSP4CMSIS_RTOS2_BACKEND_FREERTOS)
+#if defined(RTE_CMSIS_RTOS2_FreeRTOS)
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
@@ -42,7 +42,7 @@ extern "C" {
  * (MainApp_Task, itself created via osThreadNew) and returns. */
 void RunProcessingChainTest(void);
 
-#if defined(CSP4CMSIS_RTOS2_BACKEND_FREERTOS)
+#if defined(RTE_CMSIS_RTOS2_FreeRTOS)
 /*----------------------------------------------------------------------------
  * Static memory for the FreeRTOS kernel's own Idle/Timer tasks.
  * Required whenever configSUPPORT_STATIC_ALLOCATION is enabled.
@@ -111,7 +111,7 @@ extern "C" void vApplicationMallocFailedHook(void)
     for (;;) {
     }
 }
-#endif // CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+#endif // RTE_CMSIS_RTOS2_FreeRTOS
 
 int main(void)
 {
@@ -124,7 +124,7 @@ int main(void)
     SystemCoreClockUpdate();
 
     printf("\r\ncsp4cmsis Alternation smoke test (RTSS-HP, DK-E8) starting\r\n");
-#if defined(CSP4CMSIS_RTOS2_BACKEND_FREERTOS)
+#if defined(RTE_CMSIS_RTOS2_FreeRTOS)
     printf("Free heap before MainApp_Task creation: %u bytes\r\n",
            (unsigned)xPortGetFreeHeapSize());
 #endif
