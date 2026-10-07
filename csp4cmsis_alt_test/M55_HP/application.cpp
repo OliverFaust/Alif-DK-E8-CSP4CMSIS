@@ -96,7 +96,7 @@ public:
     const char* name() const override { return "Receiver"; }
 
     void run() override {
-        osDelay(10);
+        SleepFor(Milliseconds(10));
         printf("[Receiver] Task running. Using Resident-Guard ALT.\r\n");
 
         Message msgA, msgB; 
