@@ -56,3 +56,30 @@ each compiles the seven CSP4CMSIS sources from the 3.0.0 pack.
 `application.cpp` and `csp4cmsis_spn.cpp` give MainApp_Task (a plain thread, not a `CSProcess`) a static
 stack and control block with `csp::internal::csp_stack_word_t` and `csp::internal::csp_static_thread_storage_t`.
 They compile with 3.0.0, but `csp::internal` is not covered by 3.x's source-compatibility promise.
+
+## neuropathway: one console owner (branch `reporter`, 2026-10-07)
+
+Before, Sensor, Inference, Console, MainApp and ExecuTorch's log hook all printed with `printf`, and their
+lines collided (`Senerence: model ready ...` in `results-3.0.0/neuropathway.txt`). Now the **Reporter** is
+the only process that prints while the network runs. Sensor and Inference send fixed-size `report_t`
+messages (`common_types.h`; trivially copyable) over one rendezvous `Channel<report_t>` with two writers:
+
+- **Sensor** reports only `Started`/`Failed`; its window signature (the handoff check) travels in
+  `window_t::sensor_sum`, so it never waits for the console while it samples the IMU.
+- **Inference** reports `Started`/`Failed` and one `Result` per window (label, logits, Sensor's and its own
+  sum; a negative code for a failed step). ExecuTorch's log hook no longer prints: it counts the messages
+  and keeps the first one's level and source line (`RuntimeLog`, reported once); the count goes with each
+  `Result`, and the Reporter prints it with the stack report.
+- **MainApp** prints its line and ends before the network runs; the Reporter prints the stack report.
+
+Board run (Release, from reset, `results-3.0.0/neuropathway_reporter.txt`; the first lines are the tail of
+the run before the reset):
+
+| | 3.0.0 before (`neuropathway.txt`) | Reporter |
+|---|---|---|
+| Lines per window | 4 (`[Sensor sig]`, `[Infer sig]`, the ExecuTorch log line, `[window]`), some collided | 1: `[window n] logits = [...] -> LABEL \| buf=b sum=s` |
+| Windows | in sequence, one every 2.56 s | 0..25 in sequence, 4 per 10 s report, every handoff sum equal (no `MISMATCH`), LAYING (board lying still) |
+| ExecuTorch log messages | one printed line per window | counted: first `level I, line 122` (model load), then one per window (`log messages so far: 5, 9, 13, ...`) |
+| Stacks Sensor / Inference / Reporter (Console) | 848 / 2168 / (600) B | 648–696 / 2224 / 672 B |
+
+Builds: Release and Debug, no warnings except ExecuTorch's (unchanged); ITCM 80.68 % (Release).

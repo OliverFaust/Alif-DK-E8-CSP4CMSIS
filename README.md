@@ -17,7 +17,8 @@ DK-E8 hardware.
 - **`neuropathway/`** — the CSP book's "Neuropathway" pipeline, adapted
   to the IMU: an ICM-42670 accelerometer feeds 128-sample windows to an
   ExecuTorch model on the Ethos-U55 NPU, which classifies them as WALKING
-  or LAYING (Sensor → Inference → Console, as a CSP process network). It
+  or LAYING (Sensor → Inference → Reporter, as a CSP process network; the
+  Reporter is the only process that prints while the network runs). It
   needs an extra pack; see [Building neuropathway](#building-neuropathway).
   Build `csp4cmsis_alt_test` first.
 

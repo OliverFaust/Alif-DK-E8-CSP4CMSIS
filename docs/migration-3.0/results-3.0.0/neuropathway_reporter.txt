@@ -1,0 +1,78 @@
+# project: neuropathway, build type Release, GCC 14.2.1, CMSIS-Toolbox 2.14.0 (Alif SDK), CSP4CMSIS 3.0.0 (published pack)
+# repo: Alif-DK-E8-CSP4CMSIS @ 8f16730 (branch reporter)
+# image: neuropathway/out/M55_HP/DevKit-E8/Release/M55_HP.bin sha256=7c2e511412197218
+# board: Alif DevKit-E8 AE822FA0E5597LS0 rev A1; console captured with capture.py (pyserial), 2026-10-07
+�[window   27] logits = [-9.086753, 11.711815] -> LAYING | buf=1 sum=37.989449
+Sensor: 696/4096 bytes used (3400 bytes unused headroom, 850 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 29
+Board init: stdout OK, calling NpuInit()...
+Board init: NPU/SRAM0 clocks enabled, calling ethosu_init()...
+Board init: completed
+
+=== BUILD MARKER: neuropathway-pingpong-0001 ===
+
+neuropathway: Sensor -> Inference -> Reporter (RTSS-HP, DK-E8) starting
+*** MainApp_Task: network started. Terminating. ***
+[executorch] log message (level I, line 122); further ones are counted in the stack report
+Inference: model ready (method_allocation_pool[SRAM0]=32768 bytes)
+Sensor: IMU streaming (decimate 16x -> convert -> normalize -> window)
+[window    0] logits = [-9.086753, 11.711815] -> LAYING | buf=0 sum=17.810553
+[window    1] logits = [-8.985789, 11.711815] -> LAYING | buf=1 sum=17.813782
+[window    2] logits = [-9.086753, 11.711815] -> LAYING | buf=0 sum=18.076134
+[window    3] logits = [-8.985789, 11.711815] -> LAYING | buf=1 sum=18.008080
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 5
+[window    4] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.988976
+[window    5] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.934282
+[window    6] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.856064
+[window    7] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.955244
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 9
+[window    8] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.946001
+[window    9] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=18.026098
+[window   10] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.962343
+[window   11] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.980686
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 13
+[window   12] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.962118
+[window   13] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=18.070799
+[window   14] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=18.051708
+[window   15] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.962765
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 17
+[window   16] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=18.001877
+[window   17] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=18.019564
+[window   18] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.962578
+[window   19] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.925846
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 21
+[window   20] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=18.018488
+[window   21] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.870483
+[window   22] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.914501
+[window   23] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.853466
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 25
+[window   24] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.832743
+[window   25] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.925806
+[window   26] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.800837
+[window   27] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.835184
+Sensor: 648/4096 bytes used (3448 bytes unused headroom, 862 words HWM)
+Inference: 2224/16384 bytes used (14160 bytes unused headroom, 3540 words HWM)
+Reporter: 672/4096 bytes used (3424 bytes unused headroom, 856 words HWM)
+[executorch] log messages so far: 29
+[window   28] logits = [-9.086753, 11.812778] -> LAYING | buf=0 sum=17.746881
+[window   29] logits = [-9.086753, 11.812778] -> LAYING | buf=1 sum=17.656239
