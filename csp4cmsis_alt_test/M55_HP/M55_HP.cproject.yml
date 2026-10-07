@@ -3,18 +3,15 @@ project:
   device: :M55_HP
 
   packs:
-    - pack: OliverFaust::CSP4CMSIS@2.0.0
+    - pack: OliverFaust::CSP4CMSIS@3.0.0
 
   define:
     - LIB_CSP4CMSIS
     # RTX5 validation pass: kept at 128 (the FreeRTOS-adapter value),
     # empirically re-verified on RTX5 hardware rather than assumed safe.
     - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
-    # csp4cmsis's static (zero-heap) allocation for RTOS objects became an
-    # explicit per-backend opt-in (csp_rtos_static.h).
-    - CSP4CMSIS_STATIC_ALLOCATION
-    # RTX5 validation pass: swapped from CSP4CMSIS_RTOS2_BACKEND_FREERTOS.
-    - CSP4CMSIS_RTOS2_BACKEND_RTX5
+    # CSP4CMSIS 3.0: static (zero-heap) allocation is the default, and the
+    # backend (Keil RTX5) is detected from RTE_Components.h; no defines.
 
   # C++ standard for application.cpp. -fno-exceptions/-fno-rtti keeps overhead low.
   misc:

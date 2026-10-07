@@ -15,17 +15,10 @@ project:
     # own prior (native-template-era) 0x20 -- see the FreeRTOSConfig.h
     # comment at this same setting for the derivation.
     - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
-    # csp4cmsis's static (zero-heap) allocation for RTOS objects became an
-    # explicit per-backend opt-in (csp_rtos_static.h) during the RTX5-
-    # portability work -- this project never got these two defines added
-    # at that time (that pass was scoped to csp4cmsis_alt_test only), so
-    # its Sensor/Inference/Console CSProcess threads and AltScheduler
-    # event-flags objects had been silently falling back to dynamic/heap
-    # allocation since then, an unflagged regression from this project's
-    # original always-static behavior. These restore it, matching the
-    # same fix already applied to csp4cmsis_alt_test.
-    - CSP4CMSIS_STATIC_ALLOCATION
-    - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
+    # CSP4CMSIS 3.0: static (zero-heap) allocation of the Sensor/Inference/
+    # Console threads and the channels' RTOS objects is the default, and
+    # the backend (Arm's FreeRTOS adapter) is detected from
+    # RTE_Components.h; no defines.
 
   add-path:
     - ./device
