@@ -14,12 +14,15 @@
  */
 class Sensor : public csp::CSProcessStatic<1024> {
 public:
-    explicit Sensor(csp::Chanout<window_t> out);
+    Sensor(csp::Chanout<window_t> out, csp::Chanout<report_t> report);
     void run() override;
     const char* name() const override { return "Sensor"; }
 
 private:
+    void fail(int16_t step, int32_t error);   /* report Failed (the caller then returns) */
+
     csp::Chanout<window_t> m_window_out;
+    csp::Chanout<report_t> m_report_out;
     uint32_t m_window_counter;
 };
 

@@ -117,53 +117,68 @@ static int32_t hardware_init(void)
 
     error_code = SERVICES_get_run_cfg(se_services_s_handle, &runp, &service_error_code);
     if (error_code) {
-        printf("Sensor: Get current run config failed\r\n");
-        return -1;
+        return -1;              /* run configuration not available */
     }
 
     ret = board_pins_config();
     if (ret != 0) {
-        printf("Sensor: ERROR board pin mux configuration failed: %" PRId32 "\r\n", ret);
-        return ret;
+        return ret;             /* pin mux configuration failed */
     }
 
     return ARM_DRIVER_OK;
 }
 
-Sensor::Sensor(Chanout<window_t> out) : m_window_out(out), m_window_counter(0) {}
+Sensor::Sensor(Chanout<window_t> out, Chanout<report_t> report)
+    : m_window_out(out), m_report_out(report), m_window_counter(0) {}
+
+/* Sensor does not print: it reports to the Reporter. In steady state it
+ * sends no reports at all (its window signature travels in window_t), so
+ * it never waits for the console while it samples the IMU. */
+void Sensor::fail(int16_t step, int32_t error)
+{
+    report_t r = {};
+    r.kind   = ReportKind::Failed;
+    r.source = ReportSource::Sensor;
+    r.code   = step;
+    r.aux    = (uint32_t)error;
+    m_report_out.write(r);
+}
 
 void Sensor::run()
 {
     for (int i = 0; i < NUM_WINDOW_BUFFERS; i++) {
         g_buffer_free_sem[i] = xSemaphoreCreateBinary();
         if (g_buffer_free_sem[i] == nullptr) {
-            printf("Sensor: FATAL: failed to create buffer-free semaphore %d\r\n", i);
+            fail(1, i);                       /* buffer-free semaphore */
             return;
         }
         xSemaphoreGive(g_buffer_free_sem[i]); /* both slots start free */
     }
 
-    printf("Sensor: initialising IMU (zero SERVICES_set_run_cfg() calls)\r\n");
-
-    int32_t ret = hardware_init();
+    int32_t ret = hardware_init();            /* zero SERVICES_set_run_cfg() calls */
     if (ret != 0) {
-        printf("Sensor: hardware_init failed, aborting\r\n");
+        fail(2, ret);
         return;
     }
 
     ret = Drv_IMU->Initialize();
     if (ret != ARM_DRIVER_OK) {
-        printf("Sensor: IMU Initialize failed (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+        fail(3, ret);
         return;
     }
     ret = Drv_IMU->PowerControl(ARM_POWER_FULL);
     if (ret != ARM_DRIVER_OK) {
-        printf("Sensor: IMU PowerControl failed (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+        fail(4, ret);
         return;
     }
-    printf("Sensor: IMU initialized and powered up, streaming continuously "
-           "(decimate 16x -> convert -> normalize -> window, %d ping-pong "
-           "buffers)\r\n", NUM_WINDOW_BUFFERS);
+    /* Streaming continuously: decimate 16x -> convert -> normalize ->
+     * window, NUM_WINDOW_BUFFERS ping-pong buffers. */
+    {
+        report_t r = {};
+        r.kind   = ReportKind::Started;
+        r.source = ReportSource::Sensor;
+        m_report_out.write(r);
+    }
 
     double   block_sum[NUM_CHANNELS] = {0};
     uint32_t block_count             = 0;
@@ -180,7 +195,7 @@ void Sensor::run()
     for (;;) {
         ret = Drv_IMU->Control(IMU_SET_INTERRUPT, true);
         if (ret != ARM_DRIVER_OK) {
-            printf("Sensor: Error enabling interrupt (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+            fail(5, ret);                     /* enabling the interrupt */
             return;
         }
         status = Drv_IMU->GetStatus();
@@ -190,17 +205,17 @@ void Sensor::run()
 
         ret = Drv_IMU->Control(IMU_SET_INTERRUPT, false);
         if (ret != ARM_DRIVER_OK) {
-            printf("Sensor: Error disabling interrupt (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+            fail(6, ret);                     /* disabling the interrupt */
             return;
         }
         ret = Drv_IMU->Control(IMU_GET_ACCELEROMETER_DATA, (uint32_t)&data[0]);
         if (ret != ARM_DRIVER_OK) {
-            printf("Sensor: Error reading accelerometer data (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+            fail(7, ret);                     /* reading the accelerometer */
             return;
         }
         ret = Drv_IMU->Control(IMU_GET_GYROSCOPE_DATA, (uint32_t)&data[1]);
         if (ret != ARM_DRIVER_OK) {
-            printf("Sensor: Error reading gyroscope data (0x%" PRIx32 ")\r\n", (uint32_t)ret);
+            fail(8, ret);                     /* reading the gyroscope */
             return;
         }
 
@@ -238,18 +253,16 @@ void Sensor::run()
                 w.buffer_index = buffer_idx;
                 w.data         = g_window_buffer[buffer_idx];
 
-                /* DIAGNOSTIC (handoff staleness investigation): signature
-                 * of the raw window as Sensor itself produced it, printed
-                 * BEFORE the channel write -- compare against Inference's
-                 * own signature of what it actually received. */
+                /* Handoff check: signature of the raw window as Sensor
+                 * itself produced it, computed BEFORE the channel write;
+                 * Inference compares it with its own sum of what it
+                 * actually received, and the Reporter prints both. */
                 {
                     float sum = 0.0f;
                     for (int i = 0; i < NUM_CHANNELS * WINDOW_SAMPLES; i++) {
                         sum += g_window_buffer[buffer_idx][i];
                     }
-                    printf("[Sensor  sig w=%4" PRIu32 " buf=%" PRIu32 "] acc_x[0]=%.6f acc_x[127]=%.6f sum=%.6f\r\n",
-                           w.index, w.buffer_index, (double)g_window_buffer[buffer_idx][0],
-                           (double)g_window_buffer[buffer_idx][WINDOW_SAMPLES - 1], (double)sum);
+                    w.sensor_sum = sum;
                 }
 
                 /* Rendezvous write -- synchronizes only the window_t

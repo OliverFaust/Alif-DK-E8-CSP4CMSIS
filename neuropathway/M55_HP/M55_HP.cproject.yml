@@ -80,8 +80,8 @@ project:
         - file: ./csp/sensor_process.cpp
         - file: ./csp/inference_process.h
         - file: ./csp/inference_process.cpp
-        - file: ./csp/console_process.h
-        - file: ./csp/console_process.cpp
+        - file: ./csp/reporter_process.h
+        - file: ./csp/reporter_process.cpp
         - file: ./csp/csp4cmsis_spn.h
         - file: ./csp/csp4cmsis_spn.cpp
         # Local operator new/delete override (routed through FreeRTOS's
