@@ -1,0 +1,169 @@
+# project: csp4cmsis_pack_test, build type Debug, GCC 14.2.1, CMSIS-Toolbox 2.14.0 (Alif SDK), CSP4CMSIS 3.0.0 (published pack)
+# repo: Alif-DK-E8-CSP4CMSIS @ 6551bad (branch csp4cmsis-3.0.0)
+# image: csp4cmsis_pack_test/out/M55_HP/DevKit-E8/Debug/M55_HP.bin sha256=18d7839456a38771
+# board: Alif DevKit-E8 AE822FA0E5597LS0 rev A1; console captured with capture.py (pyserial), 2026-10-07
+�
+csp4cmsis Alternation smoke test (RTSS-HP, DK-E8) starting
+Free heap before MainApp_Task creation: 0 bytes
+RunProcessingChainTest() returned, starting scheduler...
+
+--- BOli2 Launching CSP Static Network (Zero-Heap) ---
+*** MainApp_Task: Run() returned, entering stack-report loop ***
+[Sender 2] Starting sequence.
+[Receiver] Task running. Using Resident-Guard ALT.
+[Receiver] Verified 1000 messages...
+[Receiver] Verified 2000 messages...
+[Receiver] Verified 3000 messages...
+[Receiver] Verified 4000 messages...
+[Receiver] Verified 5000 messages...
+[Receiver] Verified 6000 messages...
+[Receiver] Verified 7000 messages...
+[Receiver] Verified 8000 messages...
+[Receiver] Verified 9000 messages...
+[Receiver] Verified 10000 messages...
+[Receiver] Verified 11000 messages...
+[Receiver] Verified 12000 messages...
+[Receiver] Verified 13000 messages...
+[Receiver] Verified 14000 messages...
+[Receiver] Verified 15000 messages...
+[Receiver] Verified 16000 messages...
+[Receiver] Verified 17000 messages...
+[Receiver] Verified 18000 messages...
+[Receiver] Verified 19000 messages...
+[Sender 1] SUCCESS:.
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+
+csp4cmsis Alternation smoke test (RTSS-HP, DK-E8) starting
+Free heap before MainApp_Task creation: 0 bytes
+RunProcessingChainTest() returned, starting scheduler...
+
+--- BOli2 Launching CSP Static Network (Zero-Heap) ---
+*** MainApp_Task: Run() returned, entering stack-report loop ***
+[Sender 2] Starting sequence.
+[Receiver] Task running. Using Resident-Guard ALT.
+[Receiver] Verified 1000 messages...
+[Receiver] Verified 2000 messages...
+[Receiver] Verified 3000 messages...
+[Receiver] Verified 4000 messages...
+[Receiver] Verified 5000 messages...
+[Receiver] Verified 6000 messages...
+[Receiver] Verified 7000 messages...
+[Receiver] Verified 8000 messages...
+[Receiver] Verified 9000 messages...
+[Receiver] Verified 10000 messages...
+[Receiver] Verified 11000 messages...
+[Receiver] Verified 12000 messages...
+[Receiver] Verified 13000 messages...
+[Receiver] Verified 14000 messages...
+[Receiver] Verified 15000 messages...
+[Receiver] Verified 16000 messages...
+[Receiver] Verified 17000 messages...
+[Receiver] Verified 18000 messages...
+[Receiver] Verified 19000 messages...
+[Sender 1] SUCCESS:.
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
+Receiver: 656/4096 bytes used (3440 bytes unused headroom, 860 words HWM)
+MainApp: 15560 bytes unused headroom (3890 words HWM, of 4096 allocated)
+Snd1: 520/2048 bytes used (1528 bytes unused headroom, 382 words HWM)
+Snd2: 420/2048 bytes used (1628 bytes unused headroom, 407 words HWM)
