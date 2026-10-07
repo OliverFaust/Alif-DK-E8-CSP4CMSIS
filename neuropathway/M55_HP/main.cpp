@@ -96,7 +96,7 @@ int main(void)
     BoardInit();
 
     printf("\r\n=== BUILD MARKER: neuropathway-pingpong-0001 ===\r\n");
-    printf("\r\nneuropathway: Sensor -> Inference -> Console (RTSS-HP, DK-E8) "
+    printf("\r\nneuropathway: Sensor -> Inference -> Reporter (RTSS-HP, DK-E8) "
            "starting\r\n");
 
     /* CMSIS-RTOS2 kernel start, as in csp4cmsis_alt_test/pack_test: the

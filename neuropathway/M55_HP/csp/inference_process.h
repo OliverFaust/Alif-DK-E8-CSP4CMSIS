@@ -17,13 +17,16 @@
  */
 class Inference : public csp::CSProcessStatic<4096> {
 public:
-    Inference(csp::Chanin<window_t> in, csp::Chanout<result_t> out);
+    Inference(csp::Chanin<window_t> in, csp::Chanout<report_t> report);
     void run() override;
     const char* name() const override { return "Inference"; }
 
 private:
+    void report(report_t r);                  /* also sends the first RuntimeLog once */
+
     csp::Chanin<window_t>  m_window_in;
-    csp::Chanout<result_t> m_result_out;
+    csp::Chanout<report_t> m_report_out;
+    bool m_log_reported = false;
 };
 
 #endif /* INFERENCE_PROCESS_H */

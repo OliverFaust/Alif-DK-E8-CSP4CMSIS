@@ -10,6 +10,7 @@
 #define COMMON_TYPES_H
 
 #include <cstdint>
+#include <type_traits>
 
 #define NUM_CHANNELS   6
 #define WINDOW_SAMPLES 128
@@ -43,13 +44,38 @@ struct window_t {
     const float* data;     /* NUM_CHANNELS*WINDOW_SAMPLES floats,
                              * channel-major then time (matches training's
                              * (N,6,128) layout) -- owned by Sensor. */
+    float sensor_sum;      /* Sum of the window's samples as Sensor wrote
+                             * them: Inference compares it with its own sum
+                             * of what it received (handoff check), and the
+                             * Reporter prints both. */
 };
 
-/* One window's classification result. */
-struct result_t {
-    uint32_t index;   /* Matches the window_t::index this result came from. */
-    int32_t  predicted; /* 0 = WALKING, 1 = LAYING. */
-    float    logits[2];
+/* One report to the Reporter, the only process that prints while the
+ * network runs: the console is a shared resource (printf from two threads
+ * interleaves or drops characters), so Sensor and Inference send what they
+ * have to say as a report_t over one rendezvous channel with several
+ * writers, and the Reporter owns every format string. */
+enum class ReportSource : uint8_t { Sensor, Inference };
+enum class ReportKind : uint8_t {
+    Started,     /* initialised and running; aux: Inference's method pool bytes */
+    Failed,      /* stopped; code: the failing step, aux: the driver/runtime error */
+    Result,      /* one window (Inference); code >= 0: the predicted label,
+                  * code < 0: the failing step, aux: the runtime error */
+    RuntimeLog,  /* ExecuTorch's first log message; code: its source line,
+                  * aux: its level character (later ones are only counted) */
 };
+
+struct report_t {
+    ReportKind   kind;
+    ReportSource source;
+    int16_t      code;
+    uint32_t     index;     /* Result, RuntimeLog: the window index */
+    uint32_t     buffer;    /* Result: the ping-pong buffer the window came in */
+    uint32_t     aux;       /* see ReportKind */
+    uint32_t     count;     /* Result: ExecuTorch log messages so far */
+    float        value[4];  /* Result: sensor sum, inference sum, logit 0, logit 1 */
+};
+static_assert(std::is_trivially_copyable<report_t>::value,
+              "channel element types must be trivially copyable");
 
 #endif /* COMMON_TYPES_H */

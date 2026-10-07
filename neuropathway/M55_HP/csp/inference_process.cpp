@@ -45,15 +45,24 @@ using executorch::runtime::TensorInfo;
 using executorch::aten::Tensor;
 
 /* Strong override of the "Platform Bare-Metal" component's weak
- * (silent) default -- makes ET_LOG/ET_CHECK_MSG failures actually
- * visible over UART4, same as every prior ExecuTorch stage. */
+ * (silent) default. It runs in Inference's thread (inside ExecuTorch's
+ * calls), and Inference does not print: the hook counts the messages and
+ * keeps the first one's level and source line, and Inference reports them
+ * (RuntimeLog once, then the count with every Result). */
+static volatile uint32_t s_et_log_count = 0;
+static volatile uint32_t s_et_first_line = 0;
+static volatile char     s_et_first_level = 0;
+
 extern "C" void et_pal_emit_log_message(
     et_timestamp_t timestamp, et_pal_log_level_t level, const char* filename,
     const char* function, size_t line, const char* message, size_t length)
 {
-    (void)timestamp; (void)length;
-    printf("[executorch:%c %s:%u %s()] %s\r\n", (char)level, filename,
-           (unsigned)line, function, message);
+    (void)timestamp; (void)filename; (void)function; (void)message; (void)length;
+    if (s_et_log_count == 0) {
+        s_et_first_line  = (uint32_t)line;
+        s_et_first_level = (char)level;
+    }
+    s_et_log_count = s_et_log_count + 1;
 }
 
 /* Same pool sizes/placement as executorch_batch_test (proven, 100/100
@@ -76,9 +85,37 @@ unsigned char temp_allocation_pool[TEMP_ALLOCATION_POOL_SIZE]
 float input_window[NUM_CHANNELS * WINDOW_SAMPLES];
 } // namespace
 
-Inference::Inference(Chanin<window_t> in, Chanout<result_t> out)
-    : m_window_in(in), m_result_out(out) {}
+Inference::Inference(Chanin<window_t> in, Chanout<report_t> report)
+    : m_window_in(in), m_report_out(report) {}
 
+void Inference::report(report_t r)
+{
+    if (!m_log_reported && s_et_log_count > 0) {
+        report_t log = {};
+        log.kind   = ReportKind::RuntimeLog;
+        log.source = ReportSource::Inference;
+        log.code   = (int16_t)s_et_first_line;
+        log.index  = r.index;
+        log.aux    = (uint32_t)s_et_first_level;
+        m_report_out.write(log);
+        m_log_reported = true;
+    }
+    r.source = ReportSource::Inference;
+    r.count  = s_et_log_count;
+    m_report_out.write(r);
+}
+
+static report_t failed(int16_t step, uint32_t error)
+{
+    report_t r = {};
+    r.kind = ReportKind::Failed;
+    r.code = step;
+    r.aux  = error;
+    return r;
+}
+
+/* Inference does not print: it reports to the Reporter (one Result per
+ * window, Started/Failed at start-up). */
 void Inference::run()
 {
     /* --- One-time model/tensor setup, exactly as executorch_batch_test's
@@ -88,24 +125,21 @@ void Inference::run()
     static BufferDataLoader loader(har_net_pte, har_net_pte_len);
     Result<Program> program_result = Program::load(&loader);
     if (!program_result.ok()) {
-        printf("Inference: Program::load failed: 0x%x\r\n",
-               (unsigned)program_result.error());
+        report(failed(1, (uint32_t)program_result.error()));     /* Program::load */
         return;
     }
     Program program = std::move(program_result.get());
 
     Result<const char*> method_name_result = program.get_method_name(0);
     if (!method_name_result.ok()) {
-        printf("Inference: get_method_name failed: 0x%x\r\n",
-               (unsigned)method_name_result.error());
+        report(failed(2, (uint32_t)method_name_result.error())); /* get_method_name */
         return;
     }
     const char* method_name = *method_name_result;
 
     Result<MethodMeta> method_meta_result = program.method_meta(method_name);
     if (!method_meta_result.ok()) {
-        printf("Inference: method_meta failed: 0x%x\r\n",
-               (unsigned)method_meta_result.error());
+        report(failed(3, (uint32_t)method_meta_result.error())); /* method_meta */
         return;
     }
     MethodMeta method_meta = method_meta_result.get();
@@ -122,8 +156,7 @@ void Inference::run()
         uint8_t* buffer = reinterpret_cast<uint8_t*>(
             method_allocator.allocate(buffer_size, 16UL));
         if (buffer == nullptr) {
-            printf("Inference: Failed to allocate planned buffer %u (%u bytes)\r\n",
-                   (unsigned)id, (unsigned)buffer_size);
+            report(failed(4, (uint32_t)buffer_size));               /* planned buffer: bytes */
             return;
         }
         planned_buffers.push_back(buffer);
@@ -134,14 +167,16 @@ void Inference::run()
 
     Result<Method> method_result = program.load_method(method_name, &memory_manager, nullptr);
     if (!method_result.ok()) {
-        printf("Inference: load_method failed: 0x%x\r\n",
-               (unsigned)method_result.error());
+        report(failed(5, (uint32_t)method_result.error()));      /* load_method */
         return;
     }
     Method method = std::move(method_result.get());
-    printf("Inference: model ready (method_allocation_pool[SRAM0]=%u bytes, "
-           "temp_allocation_pool[SRAM0]=%u bytes), waiting for windows\r\n",
-           METHOD_ALLOCATION_POOL_SIZE, TEMP_ALLOCATION_POOL_SIZE);
+    {
+        report_t r = {};
+        r.kind = ReportKind::Started;
+        r.aux  = METHOD_ALLOCATION_POOL_SIZE;   /* model ready; method pool in SRAM0 */
+        report(r);
+    }
 
     /* --- Per-window loop -- receives a window_t from Sensor in place of
      * executorch_batch_test's batch_test_vectors[i], everything after
@@ -150,19 +185,21 @@ void Inference::run()
         window_t w;
         m_window_in.read(w);
 
-        /* DIAGNOSTIC (handoff staleness investigation): signature of
-         * what Inference actually received through the channel,
-         * computed on w.data BEFORE any copy/quantization -- compare
-         * against Sensor's own signature of the same window (printed
-         * before the channel write) to localize whether the bug is in
-         * the handoff itself or upstream/downstream of it. */
+        /* Handoff check: signature of what Inference actually received
+         * through the channel, computed on w.data BEFORE any copy --
+         * reported together with Sensor's own signature of the same
+         * window (w.sensor_sum, computed before the channel write). */
+        report_t r = {};
+        r.kind      = ReportKind::Result;
+        r.index     = w.index;
+        r.buffer    = w.buffer_index;
+        r.value[0]  = w.sensor_sum;
         {
             float sum = 0.0f;
             for (int i = 0; i < NUM_CHANNELS * WINDOW_SAMPLES; i++) {
                 sum += w.data[i];
             }
-            printf("[Infer   sig w=%4" PRIu32 " buf=%" PRIu32 "] acc_x[0]=%.6f acc_x[127]=%.6f sum=%.6f\r\n",
-                   w.index, w.buffer_index, (double)w.data[0], (double)w.data[WINDOW_SAMPLES - 1], (double)sum);
+            r.value[1] = sum;
         }
 
         std::memcpy(input_window, w.data, sizeof(input_window));
@@ -178,20 +215,20 @@ void Inference::run()
         EValue input_evalues[1];
         Error err = method.get_inputs(input_evalues, num_inputs);
         if (err != Error::Ok) {
-            printf("Inference: get_inputs failed: 0x%x (window %" PRIu32 ")\r\n",
-                   (unsigned)err, w.index);
+            r.code = -1; r.aux = (uint32_t)err;        /* get_inputs */
+            report(r);
             continue;
         }
 
         Result<TensorInfo> tensor_meta = method_meta.input_tensor_meta(0);
         if (!tensor_meta.ok()) {
-            printf("Inference: input_tensor_meta failed: 0x%x\r\n",
-                   (unsigned)tensor_meta.error());
+            r.code = -2; r.aux = (uint32_t)tensor_meta.error();   /* input_tensor_meta */
+            report(r);
             continue;
         }
         if (tensor_meta->nbytes() != sizeof(input_window)) {
-            printf("Inference: input size mismatch: tensor wants %zu bytes, "
-                   "have %zu\r\n", tensor_meta->nbytes(), sizeof(input_window));
+            r.code = -3; r.aux = (uint32_t)tensor_meta->nbytes(); /* input size mismatch */
+            report(r);
             continue;
         }
 
@@ -201,21 +238,21 @@ void Inference::run()
 
         Error status = method.execute();
         if (status != Error::Ok) {
-            printf("Inference: execute() failed: 0x%x (window %" PRIu32 ")\r\n",
-                   (unsigned)status, w.index);
+            r.code = -4; r.aux = (uint32_t)status;     /* execute */
+            report(r);
             continue;
         }
 
         std::vector<EValue> outputs(method.outputs_size());
         status = method.get_outputs(outputs.data(), outputs.size());
         if (status != Error::Ok) {
-            printf("Inference: get_outputs failed: 0x%x (window %" PRIu32 ")\r\n",
-                   (unsigned)status, w.index);
+            r.code = -5; r.aux = (uint32_t)status;     /* get_outputs */
+            report(r);
             continue;
         }
         if (!outputs[0].isTensor()) {
-            printf("Inference: output[0] is not a tensor (window %" PRIu32 ")\r\n",
-                   w.index);
+            r.code = -6;                               /* output[0] is not a tensor */
+            report(r);
             continue;
         }
         Tensor out = outputs[0].toTensor();
@@ -231,12 +268,9 @@ void Inference::run()
             }
         }
 
-        result_t res;
-        res.index     = w.index;
-        res.predicted = predicted;
-        res.logits[0] = logits[0];
-        res.logits[1] = (numel > 1) ? logits[1] : 0.0f;
-
-        m_result_out.write(res);
+        r.code     = (int16_t)predicted;
+        r.value[2] = logits[0];
+        r.value[3] = (numel > 1) ? logits[1] : 0.0f;
+        report(r);
     }
 }
