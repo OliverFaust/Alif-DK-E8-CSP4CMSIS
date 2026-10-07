@@ -26,7 +26,7 @@ static osThreadId_t s_main_app_task_handle = NULL;
 #define MAIN_APP_STACK_WORDS 4096
 
 // MainApp_Task's priority, one step above the CSP network it spawns
-// (csp4cmsis's own CSP_LEGACY_PARALLEL_PRIORITY, osPriorityLow) --
+// (Run()'s default CSP_DEFAULT_NETWORK_PRIORITY, osPriorityLow) --
 // preserving the old native-FreeRTOS relationship this task was
 // originally given (tskIDLE_PRIORITY+3 vs. the network's tskIDLE_
 // PRIORITY+2 -- exactly one step apart) on evidence-of-intent grounds.
@@ -45,7 +45,7 @@ struct Message {
 };
 
 // --- 1. Define Channels ---
-// 'Channel' or 'One2OneChannel' now represents a Rendezvous (capacity 0) sync point.
+// 'Channel' is a rendezvous (capacity 0) sync point.
 using AltChannel = Channel<Message>;
 
 // CSProcess is abstract: stackWords()/stackBuffer()/taskBuffer() are pure
@@ -208,8 +208,8 @@ void MainApp_Task(void* params) {
     }
 }
 
-// MainApp_Task's own stack buffer and (when this project opts into
-// static allocation) thread control block -- same pattern csp4cmsis's
+// MainApp_Task's own stack buffer and (with static allocation,
+// CSP4CMSIS's default) thread control block -- same pattern csp4cmsis's
 // own Run()/ParallelHelper use for CSP processes (public_task.h, run.h),
 // applied here since MainApp_Task is this app's own task, not a
 // CSProcess. static storage, matching this file's other static objects

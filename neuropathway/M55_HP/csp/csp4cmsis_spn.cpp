@@ -31,7 +31,7 @@ using namespace csp;
 #define MAIN_APP_STACK_WORDS 1024
 
 // MainApp_Task's priority, one step above the CSP network it spawns
-// (csp4cmsis's own CSP_LEGACY_PARALLEL_PRIORITY, osPriorityLow) --
+// (Run()'s default CSP_DEFAULT_NETWORK_PRIORITY, osPriorityLow) --
 // identical reasoning and identical resolved value to
 // csp4cmsis_alt_test/application.cpp's own CSP_MAIN_APP_PRIORITY: the old
 // native-FreeRTOS formula here was the exact same tskIDLE_PRIORITY+3
