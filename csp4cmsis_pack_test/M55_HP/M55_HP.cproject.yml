@@ -15,21 +15,14 @@ project:
   # component's own doc file) -- set by following that document alone,
   # not from any other knowledge of this repo's other projects.
   define:
-    # Required (1): select the CMSIS-RTOS2 backend. FreeRTOS adapter --
-    # the simpler baseline; RTX5 is a follow-up.
-    - CSP4CMSIS_RTOS2_BACKEND_FREERTOS
-    # Optional (2): static (zero-heap) allocation for CSP4CMSIS's own
-    # RTOS2 objects.
-    - CSP4CMSIS_STATIC_ALLOCATION
-    # Required if using BufferedChannel/putFromISR() (3): this project's
-    # application.cpp doesn't use either (RendezvousChannel/ALT only,
-    # copied from csp4cmsis_alt_test's application.cpp), so per the doc's
-    # own final paragraph in section 3, this define isn't required at
-    # all. Set anyway, at the same value already derived and hardware-
-    # confirmed for this exact board (DK-E8 M55_HP) in csp4cmsis_alt_test
-    # -- the doc is explicit this value depends on board peripheral IRQ
-    # priorities, not on which project/backend is asking, so reusing it
-    # for the same board is correct, not tribal knowledge.
+    # (1) Backend: not defined; detected from RTE_Components.h (Arm's
+    # FreeRTOS adapter, RTE_CMSIS_RTOS2_FreeRTOS).
+    # (2) Static (zero-heap) allocation of CSP4CMSIS's own RTOS2 objects:
+    # the default, no define.
+    # (3) Always required (3.0). The value depends on the board's
+    # peripheral IRQ priorities, not on the project or backend, so it is
+    # the one derived and hardware-confirmed for this board (DK-E8 M55_HP)
+    # in csp4cmsis_alt_test.
     - CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY: 128
 
   # C++ standard for application.cpp. -fno-exceptions/-fno-rtti: matches
