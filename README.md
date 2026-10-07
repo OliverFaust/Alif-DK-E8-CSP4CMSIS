@@ -21,11 +21,14 @@ DK-E8 hardware.
   needs an extra pack; see [Building neuropathway](#building-neuropathway).
   Build `csp4cmsis_alt_test` first.
 
-All three consume CSP4CMSIS **2.0.0** as a packaged component
+All three consume CSP4CMSIS **3.0.0** as a packaged component
 (`OliverFaust::CSP4CMSIS:Core`, the published pack, pinned as
-`OliverFaust::CSP4CMSIS@2.0.0`) rather than embedding the library source.
-They moved from 1.0.0 without source changes; the 1.0.0 and 2.0.0 board
-runs are in [`docs/migration-2.0/`](docs/migration-2.0/).
+`OliverFaust::CSP4CMSIS@3.0.0`) rather than embedding the library source,
+and define only `CSP4CMSIS_MAX_SYSCALL_INTERRUPT_PRIORITY` (static allocation
+is the default, the RTOS is detected). They moved from 1.0.0 to 2.0.0
+without source changes; the 1.0.0 and 2.0.0 board runs are in
+[`docs/migration-2.0/`](docs/migration-2.0/), the 3.0.0 changes and runs in
+[`docs/migration-3.0/`](docs/migration-3.0/).
 
 ## What you need
 
@@ -104,12 +107,12 @@ cpackget init https://www.keil.com/pack/index.pidx
 self-hosted on GitHub Releases. Add it once, explicitly, before building:
 
 ```bash
-cpackget add -a https://github.com/OliverFaust/CSP4CMSIS/releases/download/v2.0.0/OliverFaust.CSP4CMSIS.2.0.0.pack
-cpackget list      # should include OliverFaust::CSP4CMSIS@2.0.0
+cpackget add -a https://github.com/OliverFaust/CSP4CMSIS/releases/download/v3.0.0/OliverFaust.CSP4CMSIS.3.0.0.pack
+cpackget list      # should include OliverFaust::CSP4CMSIS@3.0.0
 ```
 
-If you built an earlier version of this repository, 1.0.0 may already be
-installed; it can stay, the projects select 2.0.0 by their pin.
+If you built an earlier version of this repository, 1.0.0 or 2.0.0 may
+already be installed; they can stay, the projects select 3.0.0 by their pin.
 
 `-a` accepts the pack's embedded MIT licence. Without it, `cpackget`
 prints the licence and asks `[A]ccept [D]ecline [E]xtract`. If you don't
@@ -334,6 +337,7 @@ before and are a harmless UART artefact.
 
 ## Verification status
 
+- **CSP4CMSIS 3.0.0.** All three projects pin the published 3.0.0 pack; the backend and static-allocation defines are gone, `main.cpp` of the two tests selects its FreeRTOS kernel hooks by the RTOS component, the Receiver sleeps with `SleepFor(Milliseconds(10))`, and comments name the 3.0 API. All six Debug and Release configurations build. One board run per project from reset (CMSIS-Toolbox 2.14.0 from the Alif SDK, Ubuntu's GCC 14.2.1), against the 2.0.0 runs: both tests verify all 20 000 messages (in `csp4cmsis_pack_test` the `SUCCESS` line is interleaved with another thread's output, as console lines were in 2.0.0), and `neuropathway` streams windows in sequence and classifies LAYING as before; stacks identical except the Receiver's (+8 B and +16 B of 4 KB). Details and logs: [`docs/migration-3.0/`](docs/migration-3.0/).
 - **CSP4CMSIS 2.0.0.** All three projects moved from 1.0.0 to the published 2.0.0 pack with no source change (pin and lock file only; `neuropathway` also starts the kernel through CMSIS-RTOS2 now). Each was built in Debug and Release and run on a DK-E8 before and after, with the same output: both tests report `SUCCESS: 20000 messages verified heap-free.`, and `neuropathway` classifies LAYING/WALKING as before. Logs: [`docs/migration-2.0/`](docs/migration-2.0/). Board runs built with CMSIS-Toolbox 2.14.0 (Alif SDK) and Ubuntu's GCC 14.2.1. Part 1 and [Building neuropathway](#building-neuropathway) were then followed again in a fresh `ubuntu:24.04` container with an empty pack root and CSP4CMSIS 2.0.0 (step 5 as above; CMSIS-Toolbox 2.14.1, Arm GNU Toolchain 14.2.rel1): `csp4cmsis_alt_test`, `csp4cmsis_pack_test` and `neuropathway` built in Debug and Release, each compiling the seven CSP4CMSIS sources from the 2.0.0 pack; `neuropathway` Release uses 78.0 % of ITCM.
 - **Build (Part 1), with CSP4CMSIS 1.0.0.** Followed step by step in a fresh `ubuntu:24.04` container with an empty pack root. The only defect found was the missing `-a` in step 5, now fixed above. With it, `csp4cmsis_alt_test` built in Debug and Release using GCC 14.2.1 and CMSIS-Toolbox 2.14.1, with all eight CSP4CMSIS sources coming from the pack. Part 1 took about 4.5 minutes and about 225 MB of downloads. In the same kind of container, `csp4cmsis_pack_test` built in Debug and Release (`cbuild CSP4CMSIS_PackTest.csolution.yml --packs`), also with all eight CSP4CMSIS sources from the pack, and `neuropathway` built in Debug and Release following [Building neuropathway](#building-neuropathway): the script fetched about 2 MB in a few seconds, and each build took under 20 seconds.
 - **Flash (Part 2).** The command shapes are confirmed against the SETOOLS binaries and config files. A full burn-and-boot run from these instructions on a clean machine has not yet been recorded. The SW4 positions and the console baud rate are unconfirmed (see above).
