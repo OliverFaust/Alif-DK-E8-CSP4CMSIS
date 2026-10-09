@@ -5,7 +5,9 @@
  * payload types differ (window_t/report_t as defined in common_types.h).
  *
  * The console has one owner: the Reporter is the only process that prints
- * while the network runs (it also prints the periodic stack report).
+ * while the network runs. MainApp stays alive and sends the stack report
+ * (one Stack report per thread every CSP_STACK_REPORT_INTERVAL_MS) over its
+ * own writer end of the report channel; it never prints.
  *
  * Migrated from native FreeRTOS (xTaskCreateStatic, raw TaskHandle_t/
  * StackType_t/StaticTask_t/UBaseType_t) to CMSIS-RTOS2, mirroring
@@ -22,6 +24,13 @@
 
 using namespace csp;
 
+/* MainApp sends the stack report on its own timer, whatever the network is
+ * doing, so the report continues when the pipeline stalls. A live
+ * worst-observed-so-far reading. */
+#ifndef CSP_STACK_REPORT_INTERVAL_MS
+#define CSP_STACK_REPORT_INTERVAL_MS (3000)
+#endif
+
 /* MainApp_Task isn't a CSProcess, so its stack isn't sized via
  * CSProcessStatic<N> -- given explicitly here, same as
  * csp4cmsis_neuropathway. */
@@ -34,9 +43,23 @@ using namespace csp;
 // native-FreeRTOS formula here was the exact same tskIDLE_PRIORITY+3
 // (vs. the network's tskIDLE_PRIORITY+2), and this task's own lifecycle
 // is functionally the same shape -- spawn the network non-blocking. Being
-// above the network, MainApp prints its line and ends before any process
-// runs, so it never competes with the Reporter for the console.
+// above the network, MainApp's stack report is not held up by a busy network
+// process; it then waits on the report channel while the Reporter prints.
 constexpr osPriority_t CSP_MAIN_APP_PRIORITY = osPriorityLow1;
+
+static report_t stackReport(ReportSource source, uint32_t allocated_bytes, uint32_t hwm_words)
+{
+    report_t r = {};
+    r.kind   = ReportKind::Stack;
+    r.source = source;
+    r.count  = allocated_bytes;
+    r.index  = hwm_words;                       /* UINT32_MAX (CSP_STACK_HWM_UNAVAILABLE): unavailable */
+    if (hwm_words != CSP_STACK_HWM_UNAVAILABLE) {
+        uint32_t unused_bytes = hwm_words * sizeof(internal::csp_stack_word_t);
+        r.aux = (unused_bytes <= allocated_bytes) ? allocated_bytes - unused_bytes : 0;
+    }
+    return r;
+}
 
 void MainApp_Task(void* params)
 {
@@ -44,17 +67,36 @@ void MainApp_Task(void* params)
     osDelay(500);
 
     static Channel<window_t> window_chan; // unbuffered
-    static Channel<report_t> report_chan; // unbuffered; writers: Sensor, Inference
+    static Channel<report_t> report_chan; // unbuffered; writers: Sensor, Inference, MainApp
 
     static Sensor    sensor(window_chan.writer(), report_chan.writer());
     static Inference inference(window_chan.reader(), report_chan.writer());
-    static CSProcess* const reported[] = { &sensor, &inference };   // for the stack report
-    static Reporter  reporter(report_chan.reader(), reported, 2);
+    static Reporter  reporter(report_chan.reader());
 
-    Run(InParallel(sensor, inference, reporter), ExecutionMode::StaticNetwork);
+    /* Kept as a named object: the stack report walks it with forEachProcess(). */
+    auto network = InParallel(sensor, inference, reporter);
+    Run(network, ExecutionMode::StaticNetwork);
 
-    printf("*** MainApp_Task: network started. Terminating. ***\r\n");
-    osThreadExit();
+    /* MainApp is an ordinary CMSIS-RTOS2 thread with its own writer end: a
+     * rendezvous may be used by any thread (it blocks on thread flag 0 of the
+     * calling thread, which MainApp uses for nothing else). */
+    Chanout<report_t> report_out = report_chan.writer();
+    static constexpr ReportSource kSources[] = {
+        ReportSource::Sensor, ReportSource::Inference, ReportSource::Reporter };  /* InParallel order */
+
+    while (true) {
+        SleepFor(Milliseconds(CSP_STACK_REPORT_INTERVAL_MS));
+
+        size_t i = 0;
+        network.forEachProcess([&](CSProcess& p) {
+            report_out << stackReport(kSources[i++],
+                                      p.stackWords() * sizeof(internal::csp_stack_word_t),
+                                      p.stackHighWaterMarkWords());
+        });
+        report_out << stackReport(ReportSource::Main,
+                                  MAIN_APP_STACK_WORDS * sizeof(internal::csp_stack_word_t),
+                                  osThreadGetStackSpace(osThreadGetId()) / sizeof(internal::csp_stack_word_t));
+    }
 }
 
 
