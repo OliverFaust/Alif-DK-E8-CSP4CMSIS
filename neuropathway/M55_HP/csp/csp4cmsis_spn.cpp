@@ -33,8 +33,9 @@ using namespace csp;
 
 /* MainApp_Task isn't a CSProcess, so its stack isn't sized via
  * CSProcessStatic<N> -- given explicitly here, same as
- * csp4cmsis_neuropathway. */
-#define MAIN_APP_STACK_WORDS 1024
+ * csp4cmsis_neuropathway. Measured on the board: 480 bytes used (it never
+ * prints), so 256 words (1 KB). */
+#define MAIN_APP_STACK_WORDS 256
 
 // MainApp_Task's priority, one step above the CSP network it spawns
 // (Run()'s default CSP_DEFAULT_NETWORK_PRIORITY, osPriorityLow) --
