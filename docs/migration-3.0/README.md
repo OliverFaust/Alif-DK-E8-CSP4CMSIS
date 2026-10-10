@@ -70,7 +70,8 @@ messages (`common_types.h`; trivially copyable) over one rendezvous `Channel<rep
   sum; a negative code for a failed step). ExecuTorch's log hook no longer prints: it counts the messages
   and keeps the first one's level and source line (`RuntimeLog`, reported once); the count goes with each
   `Result`, and the Reporter prints it with the stack report.
-- **MainApp** prints its line and ends before the network runs; the Reporter prints the stack report.
+- **MainApp** printed its line and ended before the network ran, and the Reporter printed the stack report
+  (changed since: see the next section).
 
 Board run (Release, from reset, `results-3.0.0/neuropathway_reporter.txt`; the first lines are the tail of
 the run before the reset):
@@ -83,3 +84,31 @@ the run before the reset):
 | Stacks Sensor / Inference / Reporter (Console) | 848 / 2168 / (600) B | 648–696 / 2224 / 672 B |
 
 Builds: Release and Debug, no warnings except ExecuTorch's (unchanged); ITCM 80.68 % (Release).
+
+## neuropathway: stack report by MainApp (branch `mainapp-stack-monitor`, 2026-10-09)
+
+As in the Himax neurochannel: the Reporter's own stack report depended on report traffic (no reports, no
+stack report -- exactly when a process stalls). Now `MainApp_Task` keeps the network (`auto network =
+InParallel(...)`), runs it as a StaticNetwork and stays alive: every 3000 ms (was 10 s in the Reporter) it
+sends one `ReportKind::Stack` report per process (`network.forEachProcess`) and one for itself
+(`osThreadGetStackSpace()`), over its own writer end of `report_chan` (now three writers). MainApp never
+prints (its "network started" line is dropped); the Reporter only receives and prints, and adds the
+ExecuTorch log count after MainApp's own line. A plain CMSIS-RTOS2 thread may use a rendezvous in CSP4CMSIS
+3.0.0 (it blocks on thread flag 0 of the calling thread; MainApp uses no thread flags otherwise). MainApp
+stays above the network (`osPriorityLow1`); time slicing is on.
+
+Board run (Release, from reset, `results-3.0.0/neuropathway_mainapp_stack.txt`):
+
+| | Reporter's stack report (before) | MainApp's stack report |
+|---|---|---|
+| Start-up | `*** MainApp_Task: network started ...`, ExecuTorch's first log message, `model ready`, `IMU streaming` | the same without MainApp's line |
+| Windows | 0..25 in sequence, every handoff sum equal | 0..25 in sequence, every handoff sum equal (and 24..119 in sequence in an earlier 300 s capture of the 4 KB build) |
+| Stack report | every 10 s, after a report | every 3 s, from MainApp: complete groups (Sensor, Inference, Reporter, CSP_Main, then the ExecuTorch count) |
+| Stacks Sensor / Inference / Reporter / CSP_Main | 648–696 / 2224 / 672 B / -- (MainApp ended) | 632–688 / 2224 / 664 / 480 of 1024 B (MainApp stack right-sized from 4096 to 1024 B) |
+
+Builds: Release and Debug, no warnings except ExecuTorch's (unchanged).
+
+Observation, not caused by this change: windows and stack reports keep the designed ratio (1.19 windows per
+3 s stack report, i.e. 2.53 s per window in board time), but in a 300 s capture only 81 stack reports
+arrived, i.e. 243 s of board time: the board's 1 kHz tick appears to run about 19 % slow against the host
+clock. Not investigated.

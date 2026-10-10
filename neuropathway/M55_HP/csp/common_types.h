@@ -52,10 +52,10 @@ struct window_t {
 
 /* One report to the Reporter, the only process that prints while the
  * network runs: the console is a shared resource (printf from two threads
- * interleaves or drops characters), so Sensor and Inference send what they
- * have to say as a report_t over one rendezvous channel with several
- * writers, and the Reporter owns every format string. */
-enum class ReportSource : uint8_t { Sensor, Inference };
+ * interleaves or drops characters), so Sensor, Inference and MainApp send
+ * what they have to say as a report_t over one rendezvous channel with
+ * three writers, and the Reporter owns every format string. */
+enum class ReportSource : uint8_t { Sensor, Inference, Reporter, Main };
 enum class ReportKind : uint8_t {
     Started,     /* initialised and running; aux: Inference's method pool bytes */
     Failed,      /* stopped; code: the failing step, aux: the driver/runtime error */
@@ -63,6 +63,9 @@ enum class ReportKind : uint8_t {
                   * code < 0: the failing step, aux: the runtime error */
     RuntimeLog,  /* ExecuTorch's first log message; code: its source line,
                   * aux: its level character (later ones are only counted) */
+    Stack,       /* one thread's stack use (MainApp, every 3 s); source says
+                  * whose; aux: used bytes, count: allocated bytes, index: HWM
+                  * in words (UINT32_MAX: unavailable) */
 };
 
 struct report_t {
